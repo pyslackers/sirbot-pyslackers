@@ -5,6 +5,7 @@ from sirbot.plugins.slack import SlackPlugin
 from sirbot.plugins.github import GithubPlugin
 
 from . import endpoints
+from .plugins import PypiPlugin, GiphyPlugin
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -18,5 +19,11 @@ if __name__ == '__main__':
     github = GithubPlugin()
     endpoints.github.create_endpoints(github)
     bot.load_plugin(github)
+
+    pypi = PypiPlugin()
+    bot.load_plugin(pypi)
+
+    giphy = GiphyPlugin()
+    bot.load_plugin(giphy)
 
     bot.start(host='127.0.0.1', port=9000)
