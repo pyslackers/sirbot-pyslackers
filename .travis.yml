@@ -16,7 +16,7 @@ script:
 
 deploy:
   provider: script
-  script: bin/deploy.sh
+  script: scripts/deploy.sh
   on:
     branch: master
     tags: false
