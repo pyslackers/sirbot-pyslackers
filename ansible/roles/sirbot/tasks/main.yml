@@ -5,6 +5,7 @@
     repo: "{{ sirbot_repo }}"
     dest: "{{ sirbot_path }}"
     version: "{{ sirbot_version }}"
+    force: yes
   notify: Restart sirbot
 
 - name: Install python
