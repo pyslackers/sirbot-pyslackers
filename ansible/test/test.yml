@@ -1,0 +1,15 @@
+---
+- name: Sir Bot-a-lot
+  hosts: localhost
+  vars:
+    travis: True
+  roles:
+    - role: pyslackers.common
+      tags:
+        - setup
+    - role: sirbot
+      tags:
+        - deploy
+    - role: pyslackers.nginx
+      tags:
+        - nginx

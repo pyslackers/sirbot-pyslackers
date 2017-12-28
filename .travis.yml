@@ -1,18 +1,46 @@
+---
 language: python
 
+services: docker
+
+env:
+  - distro=debian8
+  - distro=debian9
+  - distro=ubuntu1604
+
 python:
-- '3.6'
-- 3.7-dev
+  - '3.6'
+  - 3.7-dev
 
 matrix:
+  fast_finish: true
   allow_failures:
-  - python: 3.7-dev
+    - python: 3.7-dev
 
 install:
+  # Python testing
   - pip install flake8
 
+  # Ansible testing
+  - export container_id=$(date +%s)
+  - idempotence=$(mktemp)
+
+  # Build and run docker container
+  - docker run --detach --volume="$TRAVIS_BUILD_DIR":/opt/sirbot-pyslackers:rw --name $container_id --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro geerlingguy/docker-$distro-ansible:latest /lib/systemd/systemd
+  - docker exec --tty ${container_id} env TERM=xterm mv /opt/sirbot-pyslackers/ansible/test/ansible.cfg ansible.cfg
+  - docker exec --tty ${container_id} env TERM=xterm apt-get update -qq
+  - docker ps
+
 script:
+  # Python testing
   - flake8
+
+  # Ansible testing
+  # Run playbook.
+  - docker exec --tty $container_id env TERM=xterm ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml --syntax-check
+  - docker exec $container_id env TERM=xterm env ANSIBLE_FORCE_COLOR=1 ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml
+  - docker exec $container_id ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml | tee -a $idempotence
+  - tail $idempotence | grep -q 'changed=0.*failed=0' && (printf 'Idempotence test pass') || (printf 'Idempotence test fail' && exit 1)
 
 deploy:
   provider: script
@@ -22,3 +50,4 @@ deploy:
     tags: false
     repo: pyslackers/sirbot-pyslackers
     python: '3.6'
+    condition: distro=debian9
