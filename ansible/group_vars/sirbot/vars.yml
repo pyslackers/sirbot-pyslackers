@@ -1,7 +1,6 @@
 ---
 ansible_python_interpreter: /usr/bin/python3
 
-sirbot_version: ansible
 email: pythondev.slack@gmail.com
 apt_upgrade: true
 github_users:

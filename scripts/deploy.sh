@@ -9,4 +9,9 @@ chmod 600 id_rsa
 
 echo -n "$ANSIBLE_PASSWORD" > .pass
 
-ansible-playbook playbook.yml --private-key=id_rsa --tags="deploy"
+if [ $TRAVIS_EVENT_TYPE == 'cron' ]
+then
+    ansible-playbook playbook.yml --private-key=id_rsa
+else
+    ansible-playbook playbook.yml --private-key=id_rsa --tags="deploy"
+fi
