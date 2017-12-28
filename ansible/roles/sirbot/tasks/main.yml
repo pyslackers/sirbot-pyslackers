@@ -1,0 +1,32 @@
+---
+
+- name: Clone sirbot
+  git:
+    repo: "{{ sirbot_repo }}"
+    dest: "{{ sirbot_path }}"
+    version: "{{ sirbot_version }}"
+  notify: Restart sirbot
+
+- name: Install python
+  include_role:
+    name: pyslackers.python
+  vars:
+    virtualenvs:
+      sirbot:
+        path: "{{ sirbot_path }}/.env"
+        version: "{{ sirbot_python_version }}"
+        requirements: "{{ sirbot_path }}/requirements.txt"
+  notify: Restart sirbot
+
+- name: Systemd service file
+  template:
+    src: etc/systemd/system/service.j2
+    dest: /etc/systemd/system/sirbot.service
+  notify: Restart sirbot
+
+- name: Enable sirbot
+  systemd:
+    name: sirbot
+    state: started
+    enabled: yes
+    daemon-reload: yes

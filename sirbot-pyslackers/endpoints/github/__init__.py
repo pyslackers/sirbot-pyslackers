@@ -30,15 +30,15 @@ async def _issues_message(event, app, color='good'):
             'fallback': 'issue {}'.format(event.data['action']),
             'color': color,
             'text': '*<{url}|{title}>*\n{body}'.format(
-                    url=event.data['issue']['html_url'],
-                    title=event.data['issue']['title'],
-                    body=event.data['issue']['body']
-                ),
+                url=event.data['issue']['html_url'],
+                title=event.data['issue']['title'],
+                body=event.data['issue']['body']
+            ),
             'title': 'Issue {action} in <{repo_url}|{name}>'.format(
-                    repo_url=event.data['repository']['html_url'],
-                    name=event.data['repository']['name'],
-                    action=event.data['action'],
-                ),
+                repo_url=event.data['repository']['html_url'],
+                name=event.data['repository']['name'],
+                action=event.data['action'],
+            ),
             'author_icon': event.data['sender']['avatar_url'],
             'author_name': event.data['sender']['login'],
             'author_link': event.data['sender']['html_url'],
@@ -56,15 +56,15 @@ async def _pr_message(event, app, color='good', action=None):
             'fallback': 'pull request {}'.format(event.data['action']),
             'color': color,
             'text': '*<{url}|{title}>*\n{body}'.format(
-                    url=event.data['pull_request']['html_url'],
-                    title=event.data['pull_request']['title'],
-                    body=event.data['pull_request']['body']
-                ),
+                url=event.data['pull_request']['html_url'],
+                title=event.data['pull_request']['title'],
+                body=event.data['pull_request']['body']
+            ),
             'title': 'Pull request {action} in <{repo_url}|{name}>'.format(
-                    repo_url=event.data['repository']['html_url'],
-                    name=event.data['repository']['name'],
-                    action=action or event.data['action'],
-                ),
+                repo_url=event.data['repository']['html_url'],
+                name=event.data['repository']['name'],
+                action=action or event.data['action'],
+            ),
             'author_icon': event.data['sender']['avatar_url'],
             'author_name': event.data['sender']['login'],
             'author_link': event.data['sender']['html_url'],
@@ -108,10 +108,10 @@ async def release_created(event, app):
     msg = Message()
     msg['channel'] = CHANNEL
     msg['text'] = 'Release {release} created in {repo} by {user}'.format(
-            release=event.data['release']['tag_name'],
-            repo=event.data['repository']['name'],
-            user=event.data['sender']['login']
-        )
+        release=event.data['release']['tag_name'],
+        repo=event.data['repository']['name'],
+        user=event.data['sender']['login']
+    )
     await app.plugins['slack'].api.query(methods.CHAT_POST_MESSAGE, data=msg)
 
 
@@ -119,9 +119,9 @@ async def repo_created(event, app):
     msg = Message()
     msg['channel'] = CHANNEL
     msg['text'] = 'Repository {repo} created by {user} :tada:'.format(
-            repo=event.data['repository']['name'],
-            user=event.data['sender']['login']
-        )
+        repo=event.data['repository']['name'],
+        user=event.data['sender']['login']
+    )
     await app.plugins['slack'].api.query(methods.CHAT_POST_MESSAGE, data=msg)
 
 
@@ -129,7 +129,7 @@ async def repo_deleted(event, app):
     msg = Message()
     msg['channel'] = CHANNEL
     msg['text'] = 'Repository {repo} deleted by {user} :cold_sweat:'.format(
-            repo=event.data['repository']['name'],
-            user=event.data['sender']['login']
-        )
+        repo=event.data['repository']['name'],
+        user=event.data['sender']['login']
+    )
     await app.plugins['slack'].api.query(methods.CHAT_POST_MESSAGE, data=msg)

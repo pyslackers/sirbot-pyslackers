@@ -1,2 +1,2 @@
-from . import slack
-from . import github
+from . import slack  # noQa F401
+from . import github  # noQa F401

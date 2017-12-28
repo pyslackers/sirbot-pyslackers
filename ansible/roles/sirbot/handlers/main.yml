@@ -1,0 +1,6 @@
+---
+
+- name: Restart sirbot
+  systemd:
+    name: sirbot
+    state: restarted

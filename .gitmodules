@@ -1,0 +1,16 @@
+[submodule "ansible/roles/pyslackers.common"]
+	path = ansible/roles/pyslackers.common
+	url = https://github.com/pyslackers/ansible-role-common.git
+	branch = master
+[submodule "ansible/roles/pyslackers.nginx"]
+	path = ansible/roles/pyslackers.nginx
+	url = https://github.com/pyslackers/ansible-role-nginx.git
+	branch = master
+[submodule "ansible/roles/pyslackers.python"]
+	path = ansible/roles/pyslackers.python
+	url = https://github.com/pyslackers/ansible-role-python.git
+	branch = master
+[submodule "ansible/roles/pyslackers.letsencrypt"]
+	path = ansible/roles/pyslackers.letsencrypt
+	url = https://github.com/pyslackers/ansible-role-letsencrypt.git
+	branch = master

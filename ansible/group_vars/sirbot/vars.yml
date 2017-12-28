@@ -1,0 +1,21 @@
+---
+ansible_python_interpreter: /usr/bin/python3
+
+sirbot_version: ansible
+email: pythondev.slack@gmail.com
+apt_upgrade: true
+github_users:
+  - ovv
+  - mrasband
+  - mikefromit
+  - seanson
+
+nginx_sites:
+  sirbot:
+    domains:
+      - sirbot-dev.pyslackers.com
+    letsencrypt: true
+    locations:
+      root:
+        location: /
+        proxy_pass: http://127.0.0.1:9000

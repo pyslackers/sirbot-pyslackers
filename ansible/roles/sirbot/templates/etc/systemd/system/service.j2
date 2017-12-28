@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=sirbot daemon
+AssertPathExists={{ sirbot_path }}/.env/bin/python
+
+[Service]
+Type=simple
+PIDFile=/run/lock/sirbot.pid
+User={{ sirbot_user }}
+Group={{ sirbot_group }}
+
+WorkingDirectory={{ sirbot_path }}
+ExecStart={{ sirbot_path }}/.env/bin/python -m sirbot-pyslackers
+PrivateTmp=true
+Restart=always
+RestartSec=4
+
+{% for k, v in sirbot_environment.items() %}
+Environment={{ k.upper() }}={{ v }}
+{% endfor %}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,2 +1,2 @@
-from .pypi import PypiPlugin
-from .giphy import GiphyPlugin
+from .pypi import PypiPlugin  # noQa F401
+from .giphy import GiphyPlugin  # noQa F401

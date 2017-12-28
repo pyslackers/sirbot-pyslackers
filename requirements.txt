@@ -1,7 +1,6 @@
 aiohttp==2.3.6
-async-timeout==2.0.0
-chardet==3.0.4
-multidict==3.3.2
-sir-bot-a-lot==0.0.1
-slack-sansio==0.2.2
-yarl==0.16.0
+aiohttp-xmlrpc==0.7.3
+sirbot==0.0.1
+slack-sansio==0.3.1
+gidgethub==2.4.1
+distance==0.1.3
