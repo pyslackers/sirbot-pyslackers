@@ -50,4 +50,4 @@ deploy:
     tags: false
     repo: pyslackers/sirbot-pyslackers
     python: '3.6'
-    condition: distro=debian9
+    condition: "$distro = debian9"
