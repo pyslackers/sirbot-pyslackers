@@ -14,7 +14,7 @@ ssh_keys:
 nginx_sites:
   sirbot:
     domains:
-      - sirbot-dev.pyslackers.com
+      - sirbot.pyslackers.com
     letsencrypt: true
     locations:
       root:
