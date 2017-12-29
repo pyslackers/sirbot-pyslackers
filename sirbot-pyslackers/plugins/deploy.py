@@ -26,7 +26,7 @@ async def deploy(request):
     if payload.get('token') == DEPLOY_TOKEN:
         await request.app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data={
             'channel': DEPLOY_CHANNEL,
-            'text': f'''Successfully deployed {payload["item"]} ({payload["branch"]}'''
+            'text': f'''Successfully deployed {payload["item"]} ({payload["branch"]} '''
                     f'''<{payload["repo"]}/commit/{payload["commit"]}|{payload["commit"][:7]}>) :tada: !'''
         })
 

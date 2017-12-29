@@ -1,0 +1,31 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  simple:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: simple
+    stream: ext://sys.stdout
+  file:
+    class: logging.handlers.RotatingFileHandler
+    filename: /var/log/sirbot.log
+    maxBytes: 5242880
+    backupCount: 7
+    level: WARNING
+    formatter: simple
+loggers:
+  sirbot:
+    level: DEBUG
+    handlers: [file,console]
+    propagate: false
+  slack:
+    level: DEBUG
+    handlers: [file,console]
+    propagate: false
+root:
+  level: INFO
+  handlers: [file, console]
+  propagate: no

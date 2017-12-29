@@ -11,7 +11,7 @@ ANNOUCEMENTS_CHANNEL = os.environ.get('SLACK_ANNOUCEMENTS_CHANNEL') or 'annoucem
 
 def create_endpoints(plugin):
     plugin.on_event('team_join', team_join)
-    plugin.on_event('team_joinr', total_members)
+    plugin.on_event('team_join', total_members)
 
 
 async def team_join(event, app):
