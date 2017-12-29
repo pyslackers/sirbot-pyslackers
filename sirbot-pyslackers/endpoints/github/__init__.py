@@ -74,6 +74,7 @@ async def _pr_message(event, app, color='good', action=None):
             )
         }
     ]
+    LOG.debug(msg)
     await app.plugins['slack'].api.query(methods.CHAT_POST_MESSAGE, data=msg)
 
 

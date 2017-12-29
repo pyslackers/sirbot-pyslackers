@@ -3,10 +3,9 @@ import logging
 from sirbot import SirBot
 from sirbot.plugins.slack import SlackPlugin
 from sirbot.plugins.github import GithubPlugin
-from sirbot.plugins.deploy import DeployPlugin
 
 from . import endpoints
-from .plugins import PypiPlugin, GiphyPlugin
+from .plugins import PypiPlugin, GiphyPlugin, DeployPlugin
 
 logging.basicConfig(level=logging.DEBUG)
 
