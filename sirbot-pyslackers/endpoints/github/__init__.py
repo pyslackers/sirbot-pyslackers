@@ -42,7 +42,8 @@ async def _issues_message(event, app, color='good'):
             'author_icon': event.data['sender']['avatar_url'],
             'author_name': event.data['sender']['login'],
             'author_link': event.data['sender']['html_url'],
-            'footer': ', '.join(label['name'] for label in event.data['issue']['labels'])
+            'footer': ', '.join(label['name'] for label in event.data['issue']['labels']),
+            'mrkdwn_in': ["text"]
         }
     ]
     await app.plugins['slack'].api.query(methods.CHAT_POST_MESSAGE, data=msg)
@@ -71,7 +72,8 @@ async def _pr_message(event, app, color='good', action=None):
             'footer': '+ {add} / - {del_}'.format(
                 add=event.data['pull_request']['additions'],
                 del_=event.data['pull_request']['deletions']
-            )
+            ),
+            'mrkdwn_in': ["text"]
         }
     ]
     await app.plugins['slack'].api.query(methods.CHAT_POST_MESSAGE, data=msg)
