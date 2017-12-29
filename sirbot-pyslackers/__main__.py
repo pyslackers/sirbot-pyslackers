@@ -9,6 +9,9 @@ from .plugins import PypiPlugin, GiphyPlugin
 
 logging.basicConfig(level=logging.DEBUG)
 
+PORT = 9000
+HOST = '127.0.0.1'
+
 if __name__ == '__main__':
     bot = SirBot()
 
@@ -26,4 +29,4 @@ if __name__ == '__main__':
     giphy = GiphyPlugin()
     bot.load_plugin(giphy)
 
-    bot.start(host='127.0.0.1', port=9000)
+    bot.start(host=HOST, port=PORT, print=False)

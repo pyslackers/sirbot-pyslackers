@@ -10,6 +10,7 @@ TELL_REGEX = re.compile('tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)')
 def create_endpoints(plugin):
     plugin.on_message('hello', hello, flags=re.IGNORECASE, mention=True)
     plugin.on_message('^tell', tell, flags=re.IGNORECASE, mention=True, admin=True)
+    plugin.on_message('.*', mention, flags=re.IGNORECASE, mention=True)
 
 
 async def hello(message, app):
@@ -35,3 +36,11 @@ async def tell(message, app):
         response['text'] = 'Sorry I can not understand'
 
     await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def mention(message, app):
+    await app.plugins['slack'].api.query(url=methods.REACTIONS_ADD, data={
+        'name': 'sirbot',
+        'channel': message['channel'],
+        'timestamp': message['ts']
+    })
