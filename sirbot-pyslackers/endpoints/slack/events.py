@@ -17,20 +17,22 @@ def create_endpoints(plugin):
 async def team_join(event, app):
     await asyncio.sleep(60)
 
-    conversation = await app.plugins['slack'].api.query(url='conversations.open', data={'users': event['user']['id']})
     message = Message()
-    message['text'] = '''Welcome to the community :tada:''' \
+    message['text'] = f'''Welcome to the community <@{event["user"]["id"]}> :tada:''' \
                       '''''' \
                       '''We are glad that you have decided to join us. We have documented a few things in the''' \
                       '''<{https://github.com/pyslackers/community/blob/master/introduction.md}|intro doc> to help''' \
                       '''you along from the beginning because we are grand believers in the Don't Repeat Yourself''' \
                       '''principle, and it just seems so professional!''' \
                       '''''' \
+                      '''If you wish you can tell us a bit about yourself in this channel.''' \
+                      '''''' \
                       '''May your :taco:s be plentiful!'''
 
-    message['channel'] = conversation['channel']['id']
+    message['channel'] = 'introduction'
+    message['user'] = event['user']['id']
 
-    await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=message)
+    await app.plugins['slack'].api.query(url=methods.CHAT_POST_EPHEMERAL, data=message)
 
 
 async def total_members(event, app):
