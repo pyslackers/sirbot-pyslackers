@@ -5,7 +5,7 @@ from slack import methods
 from slack.events import Message
 
 LOG = logging.getLogger(__name__)
-CHANNEL = os.environ.get('SLACK_GITHUB_HOOK_CHANNEL') or 'comunity_projects'
+CHANNEL = os.environ.get('SLACK_GITHUB_HOOK_CHANNEL') or 'community_projects'
 
 
 def create_endpoints(plugin):
@@ -74,7 +74,6 @@ async def _pr_message(event, app, color='good', action=None):
             )
         }
     ]
-    LOG.debug(msg)
     await app.plugins['slack'].api.query(methods.CHAT_POST_MESSAGE, data=msg)
 
 
