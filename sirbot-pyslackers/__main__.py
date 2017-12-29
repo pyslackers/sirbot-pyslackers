@@ -3,6 +3,7 @@ import logging
 from sirbot import SirBot
 from sirbot.plugins.slack import SlackPlugin
 from sirbot.plugins.github import GithubPlugin
+from sirbot.plugins.deploy import DeployPlugin
 
 from . import endpoints
 from .plugins import PypiPlugin, GiphyPlugin
@@ -28,5 +29,8 @@ if __name__ == '__main__':
 
     giphy = GiphyPlugin()
     bot.load_plugin(giphy)
+
+    deploy = DeployPlugin()
+    bot.load_plugin(deploy)
 
     bot.start(host=HOST, port=PORT, print=False)

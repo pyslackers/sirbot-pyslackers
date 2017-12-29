@@ -6,7 +6,10 @@
     dest: "{{ sirbot_path }}"
     version: "{{ sirbot_version }}"
     force: yes
-  notify: Restart sirbot
+  register: clone
+  notify:
+    - Restart sirbot
+    - Successful deploy
 
 - name: Install python
   include_role:
