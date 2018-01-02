@@ -1,8 +1,10 @@
 import os
 import yaml
+import raven
 import logging.config
 
 from raven.conf import setup_logging
+from raven.processors import SanitizePasswordsProcessor
 from raven.handlers.logging import SentryHandler
 
 from sirbot import SirBot
@@ -27,7 +29,12 @@ if __name__ == '__main__':
 
     sentry_dsn = os.environ.get('SENTRY_DSN')
     if sentry_dsn:
-        handler = SentryHandler(sentry_dsn)
+        client = raven.Client(
+            dsn=sentry_dsn,
+            release=raven.fetch_git_sha(os.path.join(os.path.dirname(__file__), os.pardir)),
+            processor=SanitizePasswordsProcessor
+        )
+        handler = SentryHandler(client)
         handler.setLevel(logging.WARNING)
         setup_logging(handler)
 

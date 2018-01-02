@@ -19,12 +19,10 @@ handlers:
 loggers:
   sirbot:
     level: DEBUG
-    handlers: [file,console]
-    propagate: false
+    propagate: true
   slack:
     level: DEBUG
-    handlers: [file,console]
-    propagate: false
+    propagate: true
 root:
   level: INFO
   handlers: [file, console]
