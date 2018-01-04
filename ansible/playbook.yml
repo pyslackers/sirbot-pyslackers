@@ -5,6 +5,9 @@
     - role: pyslackers.common
       tags:
         - setup
+    - role: pyslackers.provider
+      tags:
+        - provider
     - role: sirbot
       tags:
         - deploy
