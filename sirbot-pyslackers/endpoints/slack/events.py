@@ -37,12 +37,12 @@ async def team_join(event, app):
 
 async def total_members(event, app):
     total_users = 0
-    async for user in app.plugins['slack'].api.iter(url=methods.USERS_LIST, limit=3000,
-                                                    data={'presence': False, 'include_locale': False}):
+    users = await app.plugins['slack'].api.query(url=methods.USERS_LIST)
+    for user in users:
         if not user['is_bot'] and not user['deleted']:
             total_users += 1
 
-    if total_users % 1000 == 0:
+    if total_users and total_users % 1000 == 0:
         message = Message()
         message['channel'] = ANNOUCEMENTS_CHANNEL
         message['text'] = f''':tada: Everyone give a warm welcome to <@{event['user']['id']}>  our {total_users}''' \
