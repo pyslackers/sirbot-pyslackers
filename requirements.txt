@@ -1,4 +1,4 @@
-aiohttp==2.3.7
+aiohttp==2.3.9
 aiohttp-xmlrpc==0.7.3
 sirbot==0.0.1
 slack-sansio==0.3.2
