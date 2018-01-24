@@ -17,6 +17,5 @@ nginx_sites:
       - sirbot.pyslackers.com
     letsencrypt: true
     locations:
-      root:
-        location: /
+      - location: /
         proxy_pass: http://127.0.0.1:9000
