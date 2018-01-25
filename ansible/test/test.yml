@@ -3,6 +3,20 @@
   hosts: localhost
   vars:
     travis: True
+    apt_upgrade: true
+    github_users:
+      - ovv
+      - mrasband
+      - mikefromit
+      - seanson
+    nginx_sites:
+      sirbot:
+        domains:
+          - sirbot.pyslackers.com
+        letsencrypt: false
+        locations:
+          - location: /
+            proxy_pass: http://127.0.0.1:9000
   roles:
     - role: pyslackers.common
       tags:
