@@ -10,13 +10,27 @@ from raven.handlers.logging import SentryHandler
 from sirbot import SirBot
 from sirbot.plugins.slack import SlackPlugin
 from sirbot.plugins.github import GithubPlugin
+from sirbot.plugins.postgres import PgPlugin
 
 from . import endpoints
 from .plugins import PypiPlugin, GiphyPlugin, DeployPlugin
 
 PORT = 9000
 HOST = '127.0.0.1'
+VERSION = '0.0.1'
 LOG = logging.getLogger(__name__)
+
+
+def make_sentry_logger():
+    client = raven.Client(
+        dsn=os.environ['SENTRY_DSN'],
+        release=raven.fetch_git_sha(os.path.join(os.path.dirname(__file__), os.pardir)),
+        processor=SanitizePasswordsProcessor
+    )
+    handler = SentryHandler(client)
+    handler.setLevel(logging.WARNING)
+    setup_logging(handler)
+
 
 if __name__ == '__main__':
     try:
@@ -27,16 +41,8 @@ if __name__ == '__main__':
         logging.basicConfig(level=logging.DEBUG)
         LOG.exception(e)
 
-    sentry_dsn = os.environ.get('SENTRY_DSN')
-    if sentry_dsn:
-        client = raven.Client(
-            dsn=sentry_dsn,
-            release=raven.fetch_git_sha(os.path.join(os.path.dirname(__file__), os.pardir)),
-            processor=SanitizePasswordsProcessor
-        )
-        handler = SentryHandler(client)
-        handler.setLevel(logging.WARNING)
-        setup_logging(handler)
+    if 'SENTRY_DSN' in os.environ:
+        make_sentry_logger()
 
     bot = SirBot()
 
@@ -56,5 +62,13 @@ if __name__ == '__main__':
 
     deploy = DeployPlugin()
     bot.load_plugin(deploy)
+
+    if 'POSTGRES_DSN' in os.environ:
+        postgres = PgPlugin(
+            version=VERSION,
+            sql_migration_directory='/opt/sirbot/sql',
+            dsn=os.environ['POSTGRES_DSN']
+        )
+        bot.load_plugin(postgres)
 
     bot.start(host=HOST, port=PORT, print=False)

@@ -1,6 +1,6 @@
 aiohttp==2.3.9
 aiohttp-xmlrpc==0.7.3
-sirbot==0.0.1
+sirbot==0.0.3
 slack-sansio==0.3.4
 gidgethub==2.4.1
 distance==0.1.3

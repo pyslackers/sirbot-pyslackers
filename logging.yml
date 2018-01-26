@@ -20,6 +20,9 @@ loggers:
   sirbot:
     level: DEBUG
     propagate: true
+  sirbot-pyslackers:
+    level: DEBUG
+    propagate: true
   slack:
     level: DEBUG
     propagate: true
