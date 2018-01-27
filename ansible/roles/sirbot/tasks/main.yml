@@ -1,6 +1,6 @@
 ---
 
-- name: Clone sirbot
+- name: "Clone sirbot {{ sirbot_version }}"
   git:
     repo: "{{ sirbot_repo }}"
     dest: "{{ sirbot_path }}"

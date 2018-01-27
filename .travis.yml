@@ -38,8 +38,13 @@ script:
   # Ansible testing
   # Run playbook.
   - docker exec --tty $container_id env TERM=xterm ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml --syntax-check
-  - docker exec $container_id env TERM=xterm env ANSIBLE_FORCE_COLOR=1 ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml
-  - docker exec $container_id ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml | tee -a $idempotence
+  - 'if [ ${TRAVIS_PULL_REQUEST} != "false" ]; then
+        docker exec $container_id env TERM=xterm env ANSIBLE_FORCE_COLOR=1 ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml -vvv -e sirbot_version=$TRAVIS_PULL_REQUEST_SHA -e sirbot_repo=https://github.com/$TRAVIS_PULL_REQUEST_SLUG.git;
+        docker exec $container_id ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml -e sirbot_version=$TRAVIS_PULL_REQUEST_SHA -e sirbot_repo=https://github.com/$TRAVIS_PULL_REQUEST_SLUG.git | tee -a $idempotence;
+     else
+        docker exec $container_id env TERM=xterm env ANSIBLE_FORCE_COLOR=1 ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml -vvv -e sirbot_version=$TRAVIS_COMMIT -e sirbot_repo=https://github.com/$TRAVIS_REPO_SLUG.git;
+        docker exec $container_id ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml -e sirbot_version=$TRAVIS_COMMIT -e sirbot_repo=https://github.com/$TRAVIS_REPO_SLUG.git | tee -a $idempotence;
+     fi'
   - tail $idempotence | grep -q 'changed=0.*failed=0' && (printf 'Idempotence test pass') || (printf 'Idempotence test fail' && exit 1)
 
 deploy:
