@@ -11,13 +11,14 @@ from sirbot import SirBot
 from sirbot.plugins.slack import SlackPlugin
 from sirbot.plugins.github import GithubPlugin
 from sirbot.plugins.postgres import PgPlugin
+from sirbot.plugins.apscheduler import APSchedulerPlugin
 
 from . import endpoints
 from .plugins import PypiPlugin, GiphyPlugin, DeployPlugin
 
 PORT = 9000
 HOST = '127.0.0.1'
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 LOG = logging.getLogger(__name__)
 
 
@@ -62,6 +63,10 @@ if __name__ == '__main__':
 
     deploy = DeployPlugin()
     bot.load_plugin(deploy)
+
+    scheduler = APSchedulerPlugin()
+    endpoints.apscheduler.create_jobs(scheduler, bot)
+    bot.load_plugin(scheduler)
 
     if 'POSTGRES_DSN' in os.environ:
         postgres = PgPlugin(

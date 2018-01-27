@@ -1,10 +1,14 @@
+import os
 import re
+import json
 import logging
 
 from slack import methods
+from slack.events import Message
 
 LOG = logging.getLogger(__name__)
 TELL_REGEX = re.compile('tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)')
+ADMIN_CHANNEL = os.environ.get('SLACK_ADMIN_CHANNEL') or 'G1DRT62UC'
 
 
 def create_endpoints(plugin):
@@ -12,6 +16,7 @@ def create_endpoints(plugin):
     plugin.on_message('^tell', tell, flags=re.IGNORECASE, mention=True, admin=True)
     plugin.on_message('.*', mention, flags=re.IGNORECASE, mention=True)
     plugin.on_message('.*', save_in_database)
+    plugin.on_message('.*', channel_topic, subtype='channel_topic')
 
 
 async def hello(message, app):
@@ -40,11 +45,13 @@ async def tell(message, app):
 
 
 async def mention(message, app):
-    await app['plugins']['slack'].api.query(url=methods.REACTIONS_ADD, data={
-        'name': 'sirbot',
-        'channel': message['channel'],
-        'timestamp': message['ts']
-    })
+
+    if message['user'] != app['plugins']['slack'].bot_user_id:
+        await app['plugins']['slack'].api.query(url=methods.REACTIONS_ADD, data={
+            'name': 'sirbot',
+            'channel': message['channel'],
+            'timestamp': message['ts']
+        })
 
 
 async def save_in_database(message, app):
@@ -54,3 +61,55 @@ async def save_in_database(message, app):
             await pg_con.execute('''
                 INSERT INTO slack.messages (id, text, "user", channel, raw) VALUES ($1, $2, $3, $4, $5)
               ''', message['ts'], message.get('text'), message.get('user'), message.get('channel'), dict(message))
+
+
+async def channel_topic(message, app):
+
+    if message['user'] not in app['plugins']['slack'].admins and message['user'] != app['plugins']['slack'].bot_user_id:
+
+        async with app['plugins']['pg'].connection() as pg_con:
+            channel = await pg_con.fetchrow('''SELECT raw FROM slack.channels WHERE id = $1''', message['channel'])
+            LOG.debug(channel)
+            if channel:
+                old_topic = channel['raw']['topic']['value']
+            else:
+                old_topic = 'Original topic not found'
+
+        response = Message()
+        response['channel'] = ADMIN_CHANNEL,
+        response['attachments'] = [
+            {
+                'fallback': 'Channel topic changed notice: old topic',
+                'title': f'<@{message["user"]}> changed <#{message["channel"]}> topic.',
+                'fields': [
+                    {
+                        'title': 'Previous topic',
+                        'value': old_topic
+                    },
+                    {
+                        'title': 'New topic',
+                        'value': message['topic']
+                    }
+                ],
+            },
+        ]
+
+        if channel:
+            response['attachments'][0]['callback_id'] = 'topic_change'
+            response['attachments'][0]['actions'] = [
+                {
+                    'name': 'validate',
+                    'text': 'Validate',
+                    'style': 'primary',
+                    'type': 'button',
+                },
+                {
+                    'name': 'revert',
+                    'text': 'Revert',
+                    'style': 'danger',
+                    'value': json.dumps({'channel': message['channel'], 'old_topic': old_topic}),
+                    'type': 'button',
+                }
+            ]
+
+        await app['plugins']['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)

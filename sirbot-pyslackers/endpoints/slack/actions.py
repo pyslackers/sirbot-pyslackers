@@ -12,6 +12,8 @@ def create_endpoints(plugin):
     plugin.on_action('gif_search', gif_search_next, name='next')
     plugin.on_action('gif_search', gif_search_cancel, name='cancel')
     plugin.on_action('gif_search', gif_search_previous, name='previous')
+    plugin.on_action('topic_change', topic_change_revert, name='revert')
+    plugin.on_action('topic_change', topic_change_validate, name='validate')
 
 
 async def gif_search_ok(action, app):
@@ -106,5 +108,35 @@ async def gif_search_cancel(action, app):
     response['channel'] = action['channel']['id']
     response['ts'] = action['message_ts']
     response['text'] = 'Cancelled'
+
+    await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+
+
+async def topic_change_revert(action, app):
+    response = Message()
+    response['channel'] = action['channel']['id']
+    response['ts'] = action['message_ts']
+    response['attachments'] = action['original_message']['attachments']
+    response['attachments'][0]['color'] = 'danger'
+    response['attachments'][0]['text'] = f'Change reverted by <@{action["user"]["id"]}>'
+    del response['attachments'][0]['actions']
+
+    data = json.loads(action['actions'][0]['value'])
+    await app.plugins['slack'].api.query(
+        url=methods.CHANNELS_SET_TOPIC,
+        data={'channel': data['channel'], 'topic': data['old_topic']}
+    )
+
+    await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+
+
+async def topic_change_validate(action, app):
+    response = Message()
+    response['channel'] = action['channel']['id']
+    response['ts'] = action['message_ts']
+    response['attachments'] = action['original_message']['attachments']
+    response['attachments'][0]['color'] = 'good'
+    response['attachments'][0]['text'] = f'Change validated by <@{action["user"]["id"]}>'
+    del response['attachments'][0]['actions']
 
     await app.plugins['slack'].api.query(url=action['response_url'], data=response)
