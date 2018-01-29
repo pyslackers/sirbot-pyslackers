@@ -5,6 +5,7 @@ import logging
 
 from slack import methods
 from slack.events import Message
+from asyncpg.exceptions import UniqueViolationError
 
 LOG = logging.getLogger(__name__)
 TELL_REGEX = re.compile('tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)')
@@ -57,10 +58,14 @@ async def mention(message, app):
 async def save_in_database(message, app):
     if 'pg' in app['plugins']:
         LOG.debug('Saving message "%s" to database.', message['ts'])
-        async with app['plugins']['pg'].connection() as pg_con:
-            await pg_con.execute('''
-                INSERT INTO slack.messages (id, text, "user", channel, raw) VALUES ($1, $2, $3, $4, $5)
-              ''', message['ts'], message.get('text'), message.get('user'), message.get('channel'), dict(message))
+        try:
+            async with app['plugins']['pg'].connection() as pg_con:
+                await pg_con.execute(
+                    '''INSERT INTO slack.messages (id, text, "user", channel, raw) VALUES ($1, $2, $3, $4, $5)''',
+                    message['ts'], message.get('text'), message.get('user'), message.get('channel'), dict(message)
+                )
+        except UniqueViolationError:
+            LOG.debug('Message "%s" already in database.', message['ts'])
 
 
 async def channel_topic(message, app):
