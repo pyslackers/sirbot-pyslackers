@@ -9,14 +9,16 @@ LOG = logging.getLogger(__name__)
 
 class PypiPlugin:
     __name__ = 'pypi'
-    ROOT_URL = 'https://pypi.python.org/pypi'
-    SEARCH_PATH = '?%3Aaction=search&term={0}&submit=search'
+    SEARCH_URL = 'https://pypi.python.org/pypi'
+    ROOT_URL = 'https://pypi.org'
+    PROJECT_URL = ROOT_URL + '/project/{0}'
+    RESULT_URL = ROOT_URL + '/search/?q={0}'
 
     def __init__(self):
         self.api = None
 
     def load(self, sirbot):
-        self.api = ServerProxy(self.ROOT_URL, client=sirbot.http_session)
+        self.api = ServerProxy(self.SEARCH_URL, client=sirbot.http_session)
 
     async def search(self, search):
         results = await self.api.search({'name': search})

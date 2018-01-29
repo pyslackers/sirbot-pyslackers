@@ -108,36 +108,39 @@ async def pypi_search(command, app):
         results = await app.plugins['pypi'].search(command['text'])
         if results:
             response['response_type'] = 'in_channel'
-            response['attachments'] = list()
+            response['attachments'] = [
+                {
+                    'title': f'<@{command["user_id"]}> Searched PyPi for `{command["text"]}`',
+                    'fallback': f'Pypi search of {command["text"]}',
+                    'fields': []
+                }
+            ]
+
             for result in results[:3]:
-                response['attachments'].append(
+                response['attachments'][0]['fields'].append(
                     {
                         'title': result['name'],
-                        'fallback': result['name'],
-                        'text': result['summary'],
-                        'title_link': f'{app.plugins["pypi"].ROOT_URL}/{result["name"]}'
+                        'value': f'<{app.plugins["pypi"].PROJECT_URL.format(result["name"])}|{result["summary"]}>'
                     }
                 )
 
             if len(results) == 4:
-                response['attachments'].append(
+                response['attachments'][0]['fields'].append(
                     {
-                        'title': results[3]['name'],
-                        'fallback': results[3]['name'],
-                        'text': results[3]['summary'],
-                        'title_link': f'{app.plugins["pypi"].ROOT_URL}/{results[3]["name"]}'
+                        'title': results[3]["name"],
+                        'value':
+                            f'<{app.plugins["pypi"].PROJECT_URL.format(results[3]["name"])}|{results[3]["summary"]}>'
                     }
                 )
             elif len(results) > 3:
-                path = app.plugins["pypi"].SEARCH_PATH.format(command['text'])
-                response['attachments'].append(
+                response['attachments'][0]['fields'].append(
                     {
-                        'title': f'{len(results) - 3} more results..',
-                        'fallback': f'{len(results) - 3} more results..',
-                        'title_link': f'{app.plugins["pypi"].ROOT_URL}/{path}'
+                        'title': f'More results',
+                        'value':
+                            f'<{app.plugins["pypi"].RESULT_URL.format(command["text"])}|'
+                            f'{len(results) - 3} more results..>',
                     }
                 )
-            response['text'] = f"<@{command['user_id']}> Searched PyPi for `{command['text']}`"
 
         else:
             response['response_type'] = 'ephemeral'
