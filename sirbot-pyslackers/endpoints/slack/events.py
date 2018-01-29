@@ -10,7 +10,7 @@ ANNOUCEMENTS_CHANNEL = os.environ.get('SLACK_ANNOUCEMENTS_CHANNEL') or 'annoucem
 
 
 def create_endpoints(plugin):
-    plugin.on_event('team_join', team_join)
+    plugin.on_event('team_join', team_join, wait=False)
     plugin.on_event('team_join', total_members, wait=False)
 
 
@@ -34,6 +34,7 @@ async def team_join(event, app):
 
 
 async def total_members(event, app):
+    LOG.debug('Calculating total members')
     total_users = 0
     async for user in app.plugins['slack'].api.iter(url=methods.USERS_LIST, minimum_time=10):
         if not user['is_bot'] and not user['deleted']:
@@ -42,6 +43,7 @@ async def total_members(event, app):
     if total_users and total_users % 1000 == 0:
         message = Message()
         message['channel'] = ANNOUCEMENTS_CHANNEL
-        message['text'] = f''':tada: Everyone give a warm welcome to <@{event['user']['id']}>  our {total_users}''' \
+        message['text'] = f''':tada: Everyone give a warm welcome to <@{event['user']['id']}>  our {total_users} ''' \
                           '''members ! :tada:'''
         await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=message)
+    LOG.debug("There is %s members", total_users)
