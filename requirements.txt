@@ -1,8 +1,8 @@
--e git+https://github.com/pyslackers/sir-bot-a-lot-2.git@629663dd23c5adf7b4b3fd39a55194effda96574#egg=sirbot
--e git+https://github.com/pyslackers/slack-sansio.git@b3f61fa4e6c8edfe30d716d262f79e7dab0ed728#egg=slack-sansio
 aiohttp==2.3.9
 aiohttp-xmlrpc==0.7.3
 gidgethub==2.4.1
 distance==0.1.3
 PyYAML==3.12
 raven==6.5.0
+slack-sansio==0.3.5
+sirbot==0.0.4

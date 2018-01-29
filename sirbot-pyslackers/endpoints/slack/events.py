@@ -11,7 +11,7 @@ ANNOUCEMENTS_CHANNEL = os.environ.get('SLACK_ANNOUCEMENTS_CHANNEL') or 'annoucem
 
 def create_endpoints(plugin):
     plugin.on_event('team_join', team_join)
-    plugin.on_event('team_join', total_members)
+    plugin.on_event('team_join', total_members, wait=False)
 
 
 async def team_join(event, app):
@@ -37,7 +37,7 @@ async def team_join(event, app):
 
 async def total_members(event, app):
     total_users = 0
-    async for user in app.plugins['slack'].api.iter(url=methods.USERS_LIST, minimum_time=3):
+    async for user in app.plugins['slack'].api.iter(url=methods.USERS_LIST, minimum_time=10):
         if not user['is_bot'] and not user['deleted']:
             total_users += 1
 

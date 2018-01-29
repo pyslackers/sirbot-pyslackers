@@ -16,7 +16,7 @@ def create_endpoints(plugin):
     plugin.on_message('hello', hello, flags=re.IGNORECASE, mention=True)
     plugin.on_message('^tell', tell, flags=re.IGNORECASE, mention=True, admin=True)
     plugin.on_message('.*', mention, flags=re.IGNORECASE, mention=True)
-    plugin.on_message('.*', save_in_database)
+    plugin.on_message('.*', save_in_database, wait=False)
     plugin.on_message('.*', channel_topic, subtype='channel_topic')
 
 
