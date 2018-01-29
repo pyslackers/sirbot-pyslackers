@@ -10,20 +10,26 @@ ADMIN_CHANNEL = os.environ.get('SLACK_ADMIN_CHANNEL') or 'G1DRT62UC'
 
 
 def create_endpoints(plugin):
-    plugin.on_command('/do', digital_ocean)
     plugin.on_command('/admin', tell_admin)
     plugin.on_command('/gif', gif_search)
     plugin.on_command('/pypi', pypi_search)
+    plugin.on_command('/sponsors', sponsors)
+    plugin.on_command('/do', sponsors)
 
 
-async def digital_ocean(command, app):
+async def sponsors(command, app):
     slack = app.plugins['slack']
     response = Message()
     response['channel'] = command['channel_id']
-    response['text'] = 'Here at Python Developers we host our website and Slack bot on <https://digitalocean.com|' \
-                       'Digital Ocean>. If you are planning on using Digital Ocean, please use our ' \
-                       '<https://m.do.co/c/457f0988c477|referral code>. You get 10 USD, while helping support the ' \
-                       'community by contributing to hosting fees for our site and <@{}>!'.format(slack.bot_user_id)
+
+    response['text'] = 'Thanks to our sponsors, <https://digitalocean.com|Digital Ocean> and ' \
+                       '<https://sentry.io|Sentry> for providing hosting & services helping us ' \
+                       'host our <https://www.pyslackers.com|website> and Sir Bot-a-lot. ' \
+                       'If you are planning on using one of those services please use our referral codes: \n' \
+                       '1. <https://m.do.co/c/457f0988c477|DO referral code>\n' \
+                       '2. <https://sentry.io/?utm_source=referral&utm_content=pyslackers&utm_campaign=community|' \
+                       'Sentry referral code>.'
+
     await slack.api.query(url=methods.CHAT_POST_MESSAGE, data=response)
 
 
