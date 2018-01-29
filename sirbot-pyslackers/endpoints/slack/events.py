@@ -18,15 +18,13 @@ async def team_join(event, app):
     await asyncio.sleep(60)
 
     message = Message()
-    message['text'] = f'''Welcome to the community <@{event["user"]["id"]}> :tada:''' \
-                      '''''' \
-                      '''We are glad that you have decided to join us. We have documented a few things in the''' \
-                      '''<{https://github.com/pyslackers/community/blob/master/introduction.md}|intro doc> to help''' \
-                      '''you along from the beginning because we are grand believers in the Don't Repeat Yourself''' \
-                      '''principle, and it just seems so professional!''' \
-                      '''''' \
-                      '''If you wish you can tell us a bit about yourself in this channel.''' \
-                      '''''' \
+    message['text'] = f'''Welcome to the community <@{event["user"]["id"]}> :tada: !\n''' \
+                      '''We are glad that you have decided to join us.\n\n''' \
+                      '''We have documented a few things in the ''' \
+                      '''<https://github.com/pyslackers/community/blob/master/introduction.md|intro doc> to help ''' \
+                      '''you along from the beginning because we are grand believers in the Don't Repeat Yourself ''' \
+                      '''principle, and it just seems so professional!\n\n''' \
+                      '''If you wish you can tell us a bit about yourself in this channel.\n\n''' \
                       '''May your :taco:s be plentiful!'''
 
     message['channel'] = 'introductions'
