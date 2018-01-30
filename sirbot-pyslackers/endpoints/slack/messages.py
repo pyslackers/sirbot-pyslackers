@@ -2,6 +2,7 @@ import os
 import re
 import json
 import logging
+import datetime
 
 from slack import methods
 from slack.events import Message
@@ -61,8 +62,10 @@ async def save_in_database(message, app):
         try:
             async with app['plugins']['pg'].connection() as pg_con:
                 await pg_con.execute(
-                    '''INSERT INTO slack.messages (id, text, "user", channel, raw) VALUES ($1, $2, $3, $4, $5)''',
-                    message['ts'], message.get('text'), message.get('user'), message.get('channel'), dict(message)
+                    '''INSERT INTO slack.messages (id, text, "user", channel, raw, time)
+                    VALUES ($1, $2, $3, $4, $5, $6)''',
+                    message['ts'], message.get('text'), message.get('user'), message.get('channel'), dict(message),
+                    datetime.datetime.fromtimestamp(int(message['ts'].split('.')[0]))
                 )
         except UniqueViolationError:
             LOG.debug('Message "%s" already in database.', message['ts'])
