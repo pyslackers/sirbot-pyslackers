@@ -36,7 +36,7 @@ async def team_join(event, app):
 async def total_members(event, app):
     LOG.debug('Calculating total members')
     total_users = 0
-    async for user in app.plugins['slack'].api.iter(url=methods.USERS_LIST, minimum_time=10):
+    async for user in app.plugins['slack'].api.iter(url=methods.USERS_LIST, minimum_time=15):
         if not user['is_bot'] and not user['deleted']:
             total_users += 1
 
