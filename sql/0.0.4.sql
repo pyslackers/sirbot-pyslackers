@@ -1,0 +1,8 @@
+CREATE TABLE slack.users (
+  id TEXT PRIMARY KEY NOT NULL,
+  name TEXT,
+  deleted BOOLEAN DEFAULT FALSE,
+  admin BOOLEAN DEFAULT FALSE,
+  bot BOOLEAN DEFAULT FALSE,
+  raw JSONB
+);
