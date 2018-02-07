@@ -15,6 +15,7 @@ def create_endpoints(plugin):
     plugin.on_command('/pypi', pypi_search)
     plugin.on_command('/sponsors', sponsors)
     plugin.on_command('/do', sponsors)
+    plugin.on_command('/snippet', snippet)
 
 
 async def sponsors(command, app):
@@ -151,5 +152,16 @@ async def pypi_search(command, app):
         else:
             response['response_type'] = 'ephemeral'
             response['text'] = f"Could not find anything on PyPi matching `{command['text']}`"
+
+    await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def snippet(command, app):
+    response = Message()
+    response['channel'] = command['channel_id']
+
+    response['text'] = 'Please use the snippet feature when sharing code :slightly_smiling_face: you can do so by ' \
+                       'clicking on the :heavy_plus_sign: on the left of the input box. For more information click ' \
+                       '<https://get.slack.help/hc/en-us/articles/204145658-Create-a-snippet|here>.'
 
     await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
