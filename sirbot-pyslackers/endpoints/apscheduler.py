@@ -32,6 +32,6 @@ async def slack_users_list(bot):
             await pg_con.execute('''INSERT INTO slack.users (id, name, deleted, admin, bot, raw) VALUES
                                     ($1, $2, $3, $4, $5, $6) ON CONFLICT (id) DO UPDATE SET
                                     name = $2, deleted = $3, admin = $4, bot = $5, raw = $6''',
-                                 user['id'], user['profile']['display_name'], user['deleted'], user['is_admin'],
-                                 user['is_bot'], user)
+                                 user['id'], user['profile']['display_name'], user.get('deleted', False),
+                                 user.get('is_admin', False), user.get('is_bot', False), user)
     LOG.info('List of slack users up to date')
