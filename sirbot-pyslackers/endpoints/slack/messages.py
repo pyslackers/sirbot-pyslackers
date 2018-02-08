@@ -19,6 +19,7 @@ def create_endpoints(plugin):
     plugin.on_message('.*', mention, flags=re.IGNORECASE, mention=True)
     plugin.on_message('.*', save_in_database, wait=False)
     plugin.on_message('.*', channel_topic, subtype='channel_topic')
+    plugin.on_message('g#', github_repo_link)
 
 
 async def hello(message, app):
@@ -120,4 +121,21 @@ async def channel_topic(message, app):
                 }
             ]
 
+        await app['plugins']['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def github_repo_link(message, app):
+    response = message.response()
+
+    start = message['text'].find('g#')
+    repo = message['text'][start + 2:].split()[0]
+
+    if '/' not in repo:
+        repo = 'pyslackers/' + repo
+
+    url = f'https://github.com/{repo}'
+    r = await app['http_session'].request('GET', url)
+
+    if r.status == 200:
+        response['text'] = url
         await app['plugins']['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
