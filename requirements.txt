@@ -6,3 +6,5 @@ PyYAML==3.12
 raven==6.5.0
 slack-sansio==0.3.5
 sirbot==0.0.4
+Cython==0.27.3
+git+https://github.com/MagicStack/asyncpg.git@05dce25f15090ae8ebfb7ba2f67a0edc60cd915a#egg=asyncpg==0.15.0.dev0
