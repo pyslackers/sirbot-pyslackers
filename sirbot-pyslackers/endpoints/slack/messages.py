@@ -60,16 +60,18 @@ async def mention(message, app):
 async def save_in_database(message, app):
     if 'pg' in app['plugins']:
         LOG.debug('Saving message "%s" to database.', message['ts'])
-        try:
-            async with app['plugins']['pg'].connection() as pg_con:
-                await pg_con.execute(
-                    '''INSERT INTO slack.messages (id, text, "user", channel, raw, time)
-                    VALUES ($1, $2, $3, $4, $5, $6)''',
-                    message['ts'], message.get('text'), message.get('user'), message.get('channel'), dict(message),
-                    datetime.datetime.fromtimestamp(int(message['ts'].split('.')[0]))
-                )
-        except UniqueViolationError:
-            LOG.debug('Message "%s" already in database.', message['ts'])
+
+        if message['ts']:  # We sometimes receive message without a timestamp. See #45
+            try:
+                async with app['plugins']['pg'].connection() as pg_con:
+                    await pg_con.execute(
+                        '''INSERT INTO slack.messages (id, text, "user", channel, raw, time)
+                        VALUES ($1, $2, $3, $4, $5, $6)''',
+                        message['ts'], message.get('text'), message.get('user'), message.get('channel'), dict(message),
+                        datetime.datetime.fromtimestamp(int(message['ts'].split('.')[0]))
+                    )
+            except UniqueViolationError:
+                LOG.debug('Message "%s" already in database.', message['ts'])
 
 
 async def channel_topic(message, app):
