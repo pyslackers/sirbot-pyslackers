@@ -55,39 +55,43 @@ async def gif_search(command, app):
     if command['text']:
         response['user'] = command['user_id']
         urls = await app.plugins['giphy'].search(command['text'])
-        urls = [url.split('?')[0] for url in urls]
-        data = json.dumps({'urls': urls, 'search': command['text'], 'index': 0})
 
-        response['attachments'] = [
-            {
-                'title': f'You searched for `{command["text"]}`',
-                'fallback': f'You searched for `{command["text"]}`',
-                'image_url': urls[0],
-                'callback_id': 'gif_search',
-                'actions': [
-                    {
-                        'name': 'ok',
-                        'text': 'Send',
-                        'style': 'primary',
-                        'value': data,
-                        'type': 'button'
-                    },
-                    {
-                        'name': 'next',
-                        'text': 'Next',
-                        'value': data,
-                        'type': 'button'
-                    },
-                    {
-                        'name': 'cancel',
-                        'text': 'Cancel',
-                        'style': 'danger',
-                        'value': data,
-                        'type': 'button'
-                    },
-                ]
-            }
-        ]
+        if urls:
+            urls = [url.split('?')[0] for url in urls]
+            data = json.dumps({'urls': urls, 'search': command['text'], 'index': 0})
+
+            response['attachments'] = [
+                {
+                    'title': f'You searched for `{command["text"]}`',
+                    'fallback': f'You searched for `{command["text"]}`',
+                    'image_url': urls[0],
+                    'callback_id': 'gif_search',
+                    'actions': [
+                        {
+                            'name': 'ok',
+                            'text': 'Send',
+                            'style': 'primary',
+                            'value': data,
+                            'type': 'button'
+                        },
+                        {
+                            'name': 'next',
+                            'text': 'Next',
+                            'value': data,
+                            'type': 'button'
+                        },
+                        {
+                            'name': 'cancel',
+                            'text': 'Cancel',
+                            'style': 'danger',
+                            'value': data,
+                            'type': 'button'
+                        },
+                    ]
+                }
+            ]
+        else:
+            response['text'] = f'No result found on giphy for: `{command["text"]}`'
         await app.plugins['slack'].api.query(url=methods.CHAT_POST_EPHEMERAL, data=response)
 
     else:
