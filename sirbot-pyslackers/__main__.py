@@ -12,6 +12,7 @@ from sirbot.plugins.slack import SlackPlugin
 from sirbot.plugins.github import GithubPlugin
 from sirbot.plugins.postgres import PgPlugin
 from sirbot.plugins.apscheduler import APSchedulerPlugin
+from sirbot.plugins.readthedocs import RTDPlugin
 
 from . import endpoints
 from .plugins import PypiPlugin, GiphyPlugin, DeployPlugin
@@ -67,6 +68,10 @@ if __name__ == '__main__':
     scheduler = APSchedulerPlugin()
     endpoints.apscheduler.create_jobs(scheduler, bot)
     bot.load_plugin(scheduler)
+
+    readthedocs = RTDPlugin()
+    endpoints.readthedocs.register(readthedocs)
+    bot.load_plugin(readthedocs)
 
     if 'POSTGRES_DSN' in os.environ:
         postgres = PgPlugin(
