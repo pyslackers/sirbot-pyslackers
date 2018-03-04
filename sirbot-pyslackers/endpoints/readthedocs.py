@@ -7,8 +7,8 @@ LOG = logging.getLogger(__name__)
 
 
 def register(readthedocs):
-    readthedocs.register_handler('sir-bot-a-lot', handlers=[build_failure, ],)
-    readthedocs.register_handler('slack-sansio', handlers=[build_failure, ],)
+    readthedocs.register_handler('sir-bot-a-lot', handlers=build_failure)
+    readthedocs.register_handler('slack-sansio', handler=build_failure)
 
 
 async def build_failure(data, app):
