@@ -11,6 +11,7 @@ ANNOUCEMENTS_CHANNEL = os.environ.get('SLACK_ANNOUCEMENTS_CHANNEL') or 'annoucem
 
 def create_endpoints(plugin):
     plugin.on_event('team_join', team_join, wait=False)
+    plugin.on_event('reaction_added', start_recording)
 
 
 async def team_join(event, app):
@@ -30,3 +31,36 @@ async def team_join(event, app):
     message['user'] = event['user']['id']
 
     await app.plugins['slack'].api.query(url=methods.CHAT_POST_EPHEMERAL, data=message)
+
+
+async def start_recording(event, app):
+
+    if event['reaction'] == 'start_recording' and 'item' in event and event['item']['type'] == 'message':
+        message = Message()
+        message['text'] = 'Would you like to record this conversation ?'
+        message['attachments'] = [
+            {
+                'fallback': 'start recording',
+                'callback_id': 'recording',
+                'actions': [
+                    {
+                        'name': 'message',
+                        'text': 'Yes, Until this message',
+                        'style': 'primary',
+                        'type': 'button',
+                        'value': event['item']['ts']
+                    },
+                    {
+                        'name': 'cancel',
+                        'text': 'Cancel',
+                        'style': 'danger',
+                        'type': 'button',
+                    }
+                ]
+            },
+        ]
+
+        message['channel'] = event['item']['channel']
+        message['user'] = event['user']
+
+        await app.plugins['slack'].api.query(url=methods.CHAT_POST_EPHEMERAL, data=message)

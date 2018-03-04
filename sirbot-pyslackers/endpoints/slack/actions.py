@@ -14,6 +14,8 @@ def create_endpoints(plugin):
     plugin.on_action('gif_search', gif_search_previous, name='previous')
     plugin.on_action('topic_change', topic_change_revert, name='revert')
     plugin.on_action('topic_change', topic_change_validate, name='validate')
+    plugin.on_action('recording', recording_cancel, name='cancel')
+    plugin.on_action('recording', recording_message, name='message')
 
 
 async def gif_search_ok(action, app):
@@ -139,4 +141,39 @@ async def topic_change_validate(action, app):
     response['attachments'][0]['text'] = f'Change validated by <@{action["user"]["id"]}>'
     del response['attachments'][0]['actions']
 
+    await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+
+
+async def recording_cancel(action, app):
+    response = Message()
+    response['channel'] = action['channel']['id']
+    response['ts'] = action['message_ts']
+    response['text'] = 'Cancelled'
+
+    await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+
+
+async def recording_message(action, app):
+    start_ts = action['actions'][0]['value']
+    end_ts = action['message_ts']
+    channel = action['channel']
+    user = action['user']
+
+    response = Message()
+    response['channel'] = action['channel']['id']
+    response['ts'] = action['message_ts']
+
+    LOG.debug('Saving messages from %s until %s in channel %s by %s', start_ts, end_ts, channel['name'], user['name'])
+    try:
+        async with app['plugins']['pg'].connection() as pg_con:
+            recording = await pg_con.fetchval(
+                '''INSERT INTO slack.recordings (start, "end", "user", channel)
+                VALUES ($1, $2, $3, $4) RETURNING id''', start_ts, end_ts, user['id'], channel['id']
+            )
+    except Exception as e:
+        response['text'] = 'Unknown error. Please try again.'
+        await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+        raise
+
+    response['text'] = f'Conversation successfully recorded with id: {recording}'
     await app.plugins['slack'].api.query(url=action['response_url'], data=response)
