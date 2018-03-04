@@ -154,8 +154,7 @@ async def recording_cancel(action, app):
 
 
 async def recording_message(action, app):
-    start_ts = action['actions'][0]['value']
-    end_ts = action['message_ts']
+    start_ts, end_ts = action['actions'][0]['value'].split(',')
     channel = action['channel']
     user = action['user']
 

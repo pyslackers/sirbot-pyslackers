@@ -8,4 +8,4 @@ PyYAML==3.12
 raven==6.6.0
 slack-sansio==0.3.5
 asyncpg==0.15.0
--e git+https://github.com/pyslackers/sir-bot-a-lot-2.git@1939ca986b545e62e57e7449c763e87a8f1e4797#egg=sirbot==0.0.0-dev
+-e git+https://github.com/pyslackers/sir-bot-a-lot-2.git@d1a6358bd42f63fcb381ab5a952ccc09d1b57783#egg=sirbot==0.0.0-dev

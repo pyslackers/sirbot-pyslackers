@@ -36,6 +36,15 @@ async def team_join(event, app):
 async def start_recording(event, app):
 
     if event['reaction'] == 'start_recording' and 'item' in event and event['item']['type'] == 'message':
+
+        async with app['plugins']['pg'].connection() as pg_con:
+            end = await pg_con.fetchval(
+                '''SELECT id FROM slack.messages WHERE channel = $1 ORDER BY time DESC LIMIT 1''',
+                event['item']['channel']
+            )
+
+        start = event['item']['ts']
+
         message = Message()
         message['text'] = 'Would you like to record this conversation ?'
         message['attachments'] = [
@@ -48,7 +57,7 @@ async def start_recording(event, app):
                         'text': 'Yes, Until this message',
                         'style': 'primary',
                         'type': 'button',
-                        'value': event['item']['ts']
+                        'value': f'{start},{end}'
                     },
                     {
                         'name': 'cancel',
