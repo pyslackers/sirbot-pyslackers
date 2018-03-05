@@ -15,6 +15,8 @@ def create_jobs(scheduler, bot):
     scheduler.scheduler.add_job(slack_channel_list, 'cron', hour=1, kwargs={'bot': bot})
     scheduler.scheduler.add_job(slack_users_list, 'cron', hour=2, kwargs={'bot': bot})
 
+    scheduler.scheduler.add_job(slack_recordings_clean, 'cron', hour=3, kwargs={'bot': bot})
+
 
 async def slack_channel_list(bot):
     LOG.info('Updating list of slack channels...')
@@ -39,3 +41,10 @@ async def slack_users_list(bot):
                                  user['id'], user['profile']['display_name'], user.get('deleted', False),
                                  user.get('is_admin', False), user.get('is_bot', False), user)
     LOG.info('List of slack users up to date')
+
+
+async def slack_recordings_clean(bot):
+    time_limit = datetime.datetime.now()
+    LOG.info('Cleaning up slack recordings older than: %s', time_limit)
+    async with bot['plugins']['pg'].connection() as pg_con:
+        await pg_con.execute('''DELETE FROM slack.recordings WHERE "commit" is FALSE and created < $1''', time_limit)

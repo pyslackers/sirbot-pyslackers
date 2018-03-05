@@ -16,6 +16,7 @@ def create_endpoints(plugin):
     plugin.on_action('topic_change', topic_change_validate, name='validate')
     plugin.on_action('recording', recording_cancel, name='cancel')
     plugin.on_action('recording', recording_message, name='message')
+    plugin.on_action('recording', recording_emoji, name='emoji')
 
 
 async def gif_search_ok(action, app):
@@ -145,34 +146,89 @@ async def topic_change_validate(action, app):
 
 
 async def recording_cancel(action, app):
+    recording_id = int(action['actions'][0]['value'])
     response = Message()
     response['channel'] = action['channel']['id']
     response['ts'] = action['message_ts']
     response['text'] = 'Cancelled'
 
+    async with app['plugins']['pg'].connection() as pg_con:
+        await pg_con.execute('''DELETE FROM slack.recordings WHERE id = $1''', recording_id)
+
     await app.plugins['slack'].api.query(url=action['response_url'], data=response)
 
 
 async def recording_message(action, app):
-    start_ts, end_ts = action['actions'][0]['value'].split(',')
-    channel = action['channel']
-    user = action['user']
+    recording_id = int(action['actions'][0]['value'])
 
     response = Message()
     response['channel'] = action['channel']['id']
     response['ts'] = action['message_ts']
 
-    LOG.debug('Saving messages from %s until %s in channel %s by %s', start_ts, end_ts, channel['name'], user['name'])
-    try:
-        async with app['plugins']['pg'].connection() as pg_con:
-            recording = await pg_con.fetchval(
-                '''INSERT INTO slack.recordings (start, "end", "user", channel)
-                VALUES ($1, $2, $3, $4) RETURNING id''', start_ts, end_ts, user['id'], channel['id']
-            )
-    except Exception as e:
-        response['text'] = 'Unknown error. Please try again.'
-        await app.plugins['slack'].api.query(url=action['response_url'], data=response)
-        raise
+    async with app['plugins']['pg'].connection() as pg_con:
+        result = await pg_con.fetchval(
+            '''UPDATE slack.recordings SET "end" = (
+            SELECT id FROM slack.messages WHERE id < $1 ORDER BY id DESC LIMIT 1
+            ), commit = TRUE WHERE id = $2 RETURNING id''', action['message_ts'], recording_id)
 
-    response['text'] = f'Conversation successfully recorded with id: {recording}'
+    if result:
+        response['text'] = 'Conversation successfully recorded.'
+    else:
+        response['text'] = 'Conversation not recorded. Please try again.'
+
+    await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+
+
+async def recording_emoji(action, app):
+    recording_id = int(action['actions'][0]['value'])
+    async with app['plugins']['pg'].connection() as pg_con:
+        created = await pg_con.fetchval(
+            '''UPDATE slack.recordings SET commit = TRUE WHERE id = $1 AND "end" is NOT NULL RETURNING id''',
+            recording_id)
+
+    response = Message()
+    response['channel'] = action['channel']['id']
+    response['ts'] = action['message_ts']
+
+    if created:
+        response['text'] = 'Conversation successfully recorded.'
+    else:
+        async with app['plugins']['pg'].connection() as pg_con:
+            exist = await pg_con.fetchval('''SELECT id FROM slack.recordings WHERE id = $1''', recording_id)
+
+        if not exist:
+            response['text'] = 'Conversation not recorded. Please try again.'
+        else:
+            response['text'] = '''*Could not find message with :stop_recording:*. \n\n''' \
+                               '''Would you like to record this conversation ?'''
+            response['attachments'] = [
+                {
+                    'fallback': 'start recording',
+                    'callback_id': 'recording',
+                    'actions': [
+                        {
+                            'name': 'message',
+                            'text': 'Yes, Until this message',
+                            'style': 'primary',
+                            'type': 'button',
+                            'value': recording_id
+                        },
+                        {
+                            'name': 'emoji',
+                            'text': 'Yes, Until the :stop_recording: emoji',
+                            'style': 'primary',
+                            'type': 'button',
+                            'value': recording_id
+                        },
+                        {
+                            'name': 'cancel',
+                            'text': 'Cancel',
+                            'style': 'danger',
+                            'type': 'button',
+                            'value': recording_id
+                        }
+                    ]
+                },
+            ]
+
     await app.plugins['slack'].api.query(url=action['response_url'], data=response)
