@@ -61,7 +61,6 @@ def _gif_search_next_previous(action, index):
     data['index'] += index
     url = data['urls'][data['index']]
     data_json = json.dumps(data)
-    response['text'] = 'pouet'
     response['attachments'] = [
         {
             'title': f'<@{action["user"]["id"]}> Searched giphy for: `{data["search"]}`',
