@@ -87,7 +87,7 @@ async def channel_topic(message, app):
                 old_topic = 'Original topic not found'
 
         response = Message()
-        response['channel'] = ADMIN_CHANNEL,
+        response['channel'] = ADMIN_CHANNEL
         response['attachments'] = [
             {
                 'fallback': 'Channel topic changed notice: old topic',
