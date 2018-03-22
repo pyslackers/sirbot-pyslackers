@@ -1,12 +1,12 @@
-import os
 import json
 import logging
 
 from slack import methods
 from slack.events import Message
 
+from .utils import ADMIN_CHANNEL
+
 LOG = logging.getLogger(__name__)
-ADMIN_CHANNEL = os.environ.get('SLACK_ADMIN_CHANNEL') or 'G1DRT62UC'
 
 
 def create_endpoints(plugin):

@@ -1,4 +1,3 @@
-import os
 import re
 import json
 import logging
@@ -8,9 +7,10 @@ from slack import methods
 from slack.events import Message
 from asyncpg.exceptions import UniqueViolationError
 
+from .utils import ADMIN_CHANNEL
+
 LOG = logging.getLogger(__name__)
 TELL_REGEX = re.compile('tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)')
-ADMIN_CHANNEL = os.environ.get('SLACK_ADMIN_CHANNEL') or 'G1DRT62UC'
 
 
 def create_endpoints(plugin):

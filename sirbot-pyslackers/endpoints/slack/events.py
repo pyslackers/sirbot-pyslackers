@@ -1,18 +1,19 @@
-import os
 import asyncio
 import logging
 
 from slack import methods
 from slack.events import Message
 
+from .utils import ADMIN_CHANNEL
+
 LOG = logging.getLogger(__name__)
-ANNOUCEMENTS_CHANNEL = os.environ.get('SLACK_ANNOUCEMENTS_CHANNEL') or 'annoucements'
 
 
 def create_endpoints(plugin):
     plugin.on_event('team_join', team_join, wait=False)
     plugin.on_event('reaction_added', start_recording)
     plugin.on_event('reaction_added', stop_recording)
+    plugin.on_event('pin_added', pin_added)
 
 
 async def team_join(event, app):
@@ -91,3 +92,13 @@ async def stop_recording(event, app):
                 AND channel = $3 AND "end" is NULL ORDER BY created ASC LIMIT 1)''',
                 event['item']['ts'], event['user'], event['item']['channel']
             )
+
+
+async def pin_added(event, app):
+
+    if event['user'] not in app['plugins']['slack'].admins:
+
+        message = Message()
+        message['channel'] = ADMIN_CHANNEL
+        message['text'] = f'Pin added in channel <#{event["channel_id"]}> by <@{event["user"]}>'
+        await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=message)
