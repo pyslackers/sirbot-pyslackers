@@ -7,6 +7,7 @@ env:
   - distro=debian8
   - distro=debian9
   - distro=ubuntu1604
+  - distro=ubuntu1804
 
 python:
   - '3.6'
@@ -29,13 +30,13 @@ install:
   - docker run --detach --volume="$TRAVIS_BUILD_DIR":/opt/sirbot-pyslackers:rw --name $container_id --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro geerlingguy/docker-$distro-ansible:latest /lib/systemd/systemd
   - docker exec --tty ${container_id} env TERM=xterm mv /opt/sirbot-pyslackers/ansible/test/ansible.cfg ansible.cfg
   - docker exec --tty ${container_id} env TERM=xterm apt-get update -qq
+  - docker exec --tty ${container_id} env TERM=xterm apt-get upgrade -y
   - docker ps
 
 script:
   # Python testing
   - flake8
 
-  # Ansible testing
   # Run playbook.
   - docker exec --tty $container_id env TERM=xterm ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml --syntax-check
   - 'if [ ${TRAVIS_PULL_REQUEST} != "false" ]; then
