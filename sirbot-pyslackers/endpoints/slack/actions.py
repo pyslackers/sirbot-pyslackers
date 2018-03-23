@@ -17,6 +17,8 @@ def create_endpoints(plugin):
     plugin.on_action('recording', recording_cancel, name='cancel')
     plugin.on_action('recording', recording_message, name='message')
     plugin.on_action('recording', recording_emoji, name='emoji')
+    plugin.on_action('pin_added', pin_added_validate, name='validate')
+    plugin.on_action('pin_added', pin_added_revert, name='revert')
 
 
 async def gif_search_ok(action, app):
@@ -229,5 +231,47 @@ async def recording_emoji(action, app):
                     ]
                 },
             ]
+
+    await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+
+
+async def pin_added_validate(action, app):
+    response = Message()
+    response['channel'] = action['channel']['id']
+    response['ts'] = action['message_ts']
+    response['attachments'] = action['original_message']['attachments']
+    response['attachments'][0]['color'] = 'good'
+    response['attachments'][0]['pretext'] = f'Pin validated by <@{action["user"]["id"]}>'
+    del response['attachments'][0]['actions']
+
+    await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+
+
+async def pin_added_revert(action, app):
+    response = Message()
+
+    response['channel'] = action['channel']['id']
+    response['ts'] = action['message_ts']
+    response['attachments'] = action['original_message']['attachments']
+    response['attachments'][0]['color'] = 'danger'
+    response['attachments'][0]['pretext'] = f'Pin reverted by <@{action["user"]["id"]}>'
+    del response['attachments'][0]['actions']
+
+    action_data = json.loads(action['actions'][0]['value'])
+    remove_data = {'channel': action_data['channel']}
+
+    if action_data['item_type'] == 'message':
+        remove_data['timestamp'] = action_data['item_id']
+    elif action_data['item_type'] == 'file':
+        remove_data['file'] = action_data['item_id']
+    elif action_data['item_type'] == 'file_comment':
+        remove_data['file_comment'] = action_data['item_id']
+    else:
+        raise TypeError(f'Unknown pin type: {action_data["type"]}')
+
+    await app.plugins['slack'].api.query(
+        url=methods.PINS_REMOVE,
+        data=remove_data
+    )
 
     await app.plugins['slack'].api.query(url=action['response_url'], data=response)
