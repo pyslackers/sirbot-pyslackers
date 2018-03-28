@@ -1,5 +1,6 @@
 import re
 import json
+import pprint
 import logging
 import datetime
 
@@ -20,6 +21,7 @@ def create_endpoints(plugin):
     plugin.on_message('.*', save_in_database, wait=False)
     plugin.on_message('.*', channel_topic, subtype='channel_topic')
     plugin.on_message('g#', github_repo_link)
+    plugin.on_message('^inspect', inspect, flags=re.IGNORECASE, mention=True, admin=True)
 
 
 async def hello(message, app):
@@ -142,3 +144,24 @@ async def github_repo_link(message, app):
         if r.status == 200:
             response['text'] = url
             await app['plugins']['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def inspect(message, app):
+    if message['channel'] == ADMIN_CHANNEL and 'text' in message and message['text']:
+
+        match = re.search('<@(.*)>', message['text'])
+        user_id = match.group(1)
+
+        async with app['plugins']['pg'].connection() as pg_con:
+            data = await pg_con.fetchrow('''SELECT raw, join_date FROM slack.users WHERE id = $1''', user_id)
+
+        if data:
+            user = data['raw']
+            user['join_date'] = data['join_date'].isoformat()
+        else:
+            data = await app['plugins']['slack'].api.query(url=methods.USERS_INFO, data={'user': user_id})
+            user = data['user']
+
+        response = message.response()
+        response['text'] = f"<@{user_id}> profile information \n```{pprint.pformat(user)}```"
+        await app['plugins']['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
