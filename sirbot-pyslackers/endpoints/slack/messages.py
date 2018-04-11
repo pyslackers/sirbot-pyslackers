@@ -6,6 +6,7 @@ import datetime
 
 from slack import methods
 from slack.events import Message
+from slack.exceptions import SlackAPIError
 from asyncpg.exceptions import UniqueViolationError
 
 from .utils import ADMIN_CHANNEL
@@ -51,12 +52,16 @@ async def tell(message, app):
 
 async def mention(message, app):
 
-    if message['user'] != app['plugins']['slack'].bot_user_id:
-        await app['plugins']['slack'].api.query(url=methods.REACTIONS_ADD, data={
-            'name': 'sirbot',
-            'channel': message['channel'],
-            'timestamp': message['ts']
-        })
+    try:
+        if message['user'] != app['plugins']['slack'].bot_user_id:
+            await app['plugins']['slack'].api.query(url=methods.REACTIONS_ADD, data={
+                'name': 'sirbot',
+                'channel': message['channel'],
+                'timestamp': message['ts']
+            })
+    except SlackAPIError as e:
+        if e.error != 'already_reacted':
+            raise
 
 
 async def save_in_database(message, app):
