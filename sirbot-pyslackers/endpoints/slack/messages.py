@@ -153,20 +153,24 @@ async def github_repo_link(message, app):
 
 async def inspect(message, app):
     if message['channel'] == ADMIN_CHANNEL and 'text' in message and message['text']:
-
-        match = re.search('<@(.*)>', message['text'])
-        user_id = match.group(1)
-
-        async with app['plugins']['pg'].connection() as pg_con:
-            data = await pg_con.fetchrow('''SELECT raw, join_date FROM slack.users WHERE id = $1''', user_id)
-
-        if data:
-            user = data['raw']
-            user['join_date'] = data['join_date'].isoformat()
-        else:
-            data = await app['plugins']['slack'].api.query(url=methods.USERS_INFO, data={'user': user_id})
-            user = data['user']
-
         response = message.response()
-        response['text'] = f"<@{user_id}> profile information \n```{pprint.pformat(user)}```"
+        match = re.search('<@(.*)>', message['text'])
+
+        if match:
+            user_id = match.group(1)
+
+            async with app['plugins']['pg'].connection() as pg_con:
+                data = await pg_con.fetchrow('''SELECT raw, join_date FROM slack.users WHERE id = $1''', user_id)
+
+            if data:
+                user = data['raw']
+                user['join_date'] = data['join_date'].isoformat()
+            else:
+                data = await app['plugins']['slack'].api.query(url=methods.USERS_INFO, data={'user': user_id})
+                user = data['user']
+
+            response['text'] = f"<@{user_id}> profile information \n```{pprint.pformat(user)}```"
+        else:
+            response['text'] = f"Sorry I couldn't figure out which user to inspect"
+
         await app['plugins']['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
