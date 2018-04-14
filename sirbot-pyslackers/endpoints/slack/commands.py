@@ -16,6 +16,7 @@ def create_endpoints(plugin):
     plugin.on_command('/sponsors', sponsors)
     plugin.on_command('/do', sponsors)
     plugin.on_command('/snippet', snippet)
+    plugin.on_command('/report', report)
 
 
 async def sponsors(command, app):
@@ -46,6 +47,40 @@ async def tell_admin(command, app):
     ]
 
     await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def report(command, app):
+
+    data = {
+        'trigger_id': command['trigger_id'],
+        'dialog': {
+            'callback_id': 'report',
+            'title': 'Report user',
+            'elements': [
+                {
+                    'label': 'Offending user',
+                    'name': 'user',
+                    'type': 'select',
+                    'data_source': 'users'
+                },
+                {
+                    'label': 'Channel',
+                    'name': 'channel',
+                    'type': 'select',
+                    'data_source': 'channels',
+                    'optional': True
+                },
+                {
+                    'label': 'Comment',
+                    'name': 'comment',
+                    'type': 'textarea',
+                    'value': command['text']
+                }
+            ]
+        }
+    }
+
+    await app.plugins['slack'].api.query(url=methods.DIALOG_OPEN, data=data)
 
 
 async def gif_search(command, app):

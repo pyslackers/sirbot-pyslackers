@@ -4,6 +4,8 @@ import logging
 from slack import methods
 from slack.events import Message
 
+from .utils import ADMIN_CHANNEL
+
 LOG = logging.getLogger(__name__)
 
 
@@ -19,6 +21,7 @@ def create_endpoints(plugin):
     plugin.on_action('recording', recording_emoji, name='emoji')
     plugin.on_action('pin_added', pin_added_validate, name='validate')
     plugin.on_action('pin_added', pin_added_revert, name='revert')
+    plugin.on_action('report', report)
 
 
 async def gif_search_ok(action, app):
@@ -273,5 +276,55 @@ async def pin_added_revert(action, app):
         url=methods.PINS_REMOVE,
         data=remove_data
     )
+
+    await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+
+
+async def report(action, app):
+    admin_msg = Message()
+    admin_msg['channel'] = ADMIN_CHANNEL
+    admin_msg['attachments'] = [
+        {
+            'fallback': f'Report from {action["user"]["name"]}',
+            'title': f'Report from <@{action["user"]["id"]}>',
+            'color': 'danger',
+            'fields': [
+                {
+                    'title': 'User',
+                    'value': f'<@{action["submission"]["user"]}>',
+                    'short': True
+                },
+            ]
+        }
+    ]
+
+    if action['submission']['channel']:
+        admin_msg['attachments'][0]['fields'].append(
+            {
+                'title': 'Channel',
+                'value': f'<#{action["submission"]["channel"]}>',
+                'short': True
+            }
+        )
+
+    admin_msg['attachments'][0]['fields'].append(
+        {
+            'title': 'Comment',
+            'value': action["submission"]["comment"],
+            'short': False
+        }
+    )
+
+    await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=admin_msg)
+
+    async with app['plugins']['pg'].connection() as pg_con:
+        await pg_con.execute(
+            '''INSERT INTO slack.reports ("user", channel, comment) VALUES ($1, $2, $3)''',
+            action['submission']['user'], action['submission']['channel'], action['submission']['comment']
+        )
+
+    response = Message()
+    response['response_type'] = 'ephemeral'
+    response['text'] = 'Thank you for your report. An admin will look into it soon.'
 
     await app.plugins['slack'].api.query(url=action['response_url'], data=response)
