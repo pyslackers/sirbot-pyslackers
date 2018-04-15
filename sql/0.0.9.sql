@@ -1,0 +1,1 @@
+ALTER TABLE slack.reports ADD COLUMN by TEXT NOT NULL;

@@ -319,8 +319,9 @@ async def report(action, app):
 
     async with app['plugins']['pg'].connection() as pg_con:
         await pg_con.execute(
-            '''INSERT INTO slack.reports ("user", channel, comment) VALUES ($1, $2, $3)''',
-            action['submission']['user'], action['submission']['channel'], action['submission']['comment']
+            '''INSERT INTO slack.reports ("user", channel, comment, by) VALUES ($1, $2, $3, $4)''',
+            action['submission']['user'], action['submission']['channel'], action['submission']['comment'],
+            action['user']['id']
         )
 
     response = Message()
