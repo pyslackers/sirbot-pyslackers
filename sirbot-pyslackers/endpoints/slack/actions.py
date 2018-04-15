@@ -14,14 +14,19 @@ def create_endpoints(plugin):
     plugin.on_action('gif_search', gif_search_next, name='next')
     plugin.on_action('gif_search', gif_search_cancel, name='cancel')
     plugin.on_action('gif_search', gif_search_previous, name='previous')
+
     plugin.on_action('topic_change', topic_change_revert, name='revert')
     plugin.on_action('topic_change', topic_change_validate, name='validate')
+
     plugin.on_action('recording', recording_cancel, name='cancel')
     plugin.on_action('recording', recording_message, name='message')
     plugin.on_action('recording', recording_emoji, name='emoji')
+
     plugin.on_action('pin_added', pin_added_validate, name='validate')
     plugin.on_action('pin_added', pin_added_revert, name='revert')
+
     plugin.on_action('report', report)
+    plugin.on_action('tell_admin', tell_admin)
 
 
 async def gif_search_ok(action, app):
@@ -327,5 +332,26 @@ async def report(action, app):
     response = Message()
     response['response_type'] = 'ephemeral'
     response['text'] = 'Thank you for your report. An admin will look into it soon.'
+
+    await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+
+
+async def tell_admin(action, app):
+    admin_msg = Message()
+    admin_msg['channel'] = ADMIN_CHANNEL
+    admin_msg['attachments'] = [
+        {
+            'fallback': f'Message from {action["user"]["name"]}',
+            'title': f'Message from <@{action["user"]["id"]}>',
+            'color': 'good',
+            'text': action['submission']['message']
+        }
+    ]
+
+    await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=admin_msg)
+
+    response = Message()
+    response['response_type'] = 'ephemeral'
+    response['text'] = 'Thank you for your message.'
 
     await app.plugins['slack'].api.query(url=action['response_url'], data=response)

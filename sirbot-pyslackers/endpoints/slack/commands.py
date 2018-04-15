@@ -4,8 +4,6 @@ import logging
 from slack import methods
 from slack.events import Message
 
-from .utils import ADMIN_CHANNEL
-
 LOG = logging.getLogger(__name__)
 
 
@@ -33,20 +31,6 @@ async def sponsors(command, app):
                        'Sentry referral code>.'
 
     await slack.api.query(url=methods.CHAT_POST_MESSAGE, data=response)
-
-
-async def tell_admin(command, app):
-    response = Message()
-    response['channel'] = ADMIN_CHANNEL
-    response['attachments'] = [
-        {
-            'fallback': f'admin message from {command["user_name"]}',
-            'text': command['text'],
-            'title': f'Message to the admin team by <@{command["user_id"]}>'
-        }
-    ]
-
-    await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
 
 
 async def report(command, app):
@@ -206,3 +190,24 @@ async def snippet(command, app):
                        '<https://get.slack.help/hc/en-us/articles/204145658-Create-a-snippet|here>.'
 
     await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def tell_admin(command, app):
+
+    data = {
+        'trigger_id': command['trigger_id'],
+        'dialog': {
+            'callback_id': 'tell_admin',
+            'title': 'Message the admin team',
+            'elements': [
+                {
+                    'label': 'Message',
+                    'name': 'message',
+                    'type': 'textarea',
+                    'value': command['text']
+                }
+            ]
+        }
+    }
+
+    await app.plugins['slack'].api.query(url=methods.DIALOG_OPEN, data=data)
