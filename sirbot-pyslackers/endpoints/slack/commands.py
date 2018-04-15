@@ -14,7 +14,6 @@ def create_endpoints(plugin):
     plugin.on_command('/gif', gif_search)
     plugin.on_command('/pypi', pypi_search)
     plugin.on_command('/sponsors', sponsors)
-    plugin.on_command('/do', sponsors)
     plugin.on_command('/snippet', snippet)
     plugin.on_command('/report', report)
 
@@ -23,12 +22,13 @@ async def sponsors(command, app):
     slack = app.plugins['slack']
     response = Message()
     response['channel'] = command['channel_id']
+    response['unfurl_links'] = False
 
     response['text'] = 'Thanks to our sponsors, <https://digitalocean.com|Digital Ocean> and ' \
                        '<https://sentry.io|Sentry> for providing hosting & services helping us ' \
-                       'host our <https://www.pyslackers.com|website> and Sir Bot-a-lot. ' \
+                       'host our <https://www.pyslackers.com|website> and Sir Bot-a-lot.\n' \
                        'If you are planning on using one of those services please use our referral codes: \n' \
-                       '1. <https://m.do.co/c/457f0988c477|DO referral code>\n' \
+                       '1. <https://m.do.co/c/457f0988c477|Digital Ocean referral code>\n' \
                        '2. <https://sentry.io/?utm_source=referral&utm_content=pyslackers&utm_campaign=community|' \
                        'Sentry referral code>.'
 
@@ -198,9 +198,11 @@ async def pypi_search(command, app):
 async def snippet(command, app):
     response = Message()
     response['channel'] = command['channel_id']
+    response['unfurl_links'] = False
 
-    response['text'] = 'Please use the snippet feature when sharing code :slightly_smiling_face: you can do so by ' \
-                       'clicking on the :heavy_plus_sign: on the left of the input box. For more information click ' \
+    response['text'] = 'Please use the snippet feature when sharing code. You can do so by ' \
+                       'clicking on the :heavy_plus_sign: on the left of the input box.\n'\
+                       'For more information click ' \
                        '<https://get.slack.help/hc/en-us/articles/204145658-Create-a-snippet|here>.'
 
     await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
