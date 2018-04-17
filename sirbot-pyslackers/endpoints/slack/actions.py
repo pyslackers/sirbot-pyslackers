@@ -1,8 +1,11 @@
 import json
 import logging
+import datetime
+
 
 from slack import methods
 from slack.events import Message
+from aiohttp.web import json_response
 
 from .utils import ADMIN_CHANNEL
 
@@ -27,6 +30,7 @@ def create_endpoints(plugin):
 
     plugin.on_action('report', report)
     plugin.on_action('tell_admin', tell_admin)
+    plugin.on_action('save_conversation', save_conversation)
 
 
 async def gif_search_ok(action, app):
@@ -355,3 +359,39 @@ async def tell_admin(action, app):
     response['text'] = 'Thank you for your message.'
 
     await app.plugins['slack'].api.query(url=action['response_url'], data=response)
+
+
+async def save_conversation(action, app):
+
+    now = datetime.datetime.now()
+    end_delay = datetime.timedelta(seconds=int(action['submission']['end']))
+    start_delay = datetime.timedelta(seconds=int(action['submission']['start']))
+
+    if end_delay >= start_delay:
+        errors = [
+            {
+                'name': 'start',
+                'error': 'Start time must be superior than end time'
+            },
+            {
+                'name': 'end',
+                'error': 'End time must be inferior than start time'
+            }
+        ]
+        return json_response(data={'errors': errors}, status=200)
+
+    end = now - end_delay
+    start = now - start_delay
+
+    async with app['plugins']['pg'].connection() as pg_con:
+        await pg_con.execute(
+            '''INSERT INTO slack.recordings (start, "end", "user", channel, comment) VALUES ($1, $2, $3, $4, $5)''',
+            start, end, action['user']['id'], action['submission']['channel'], action['submission']['comment']
+        )
+
+    response = Message()
+    response['text'] = f'Conversation from {start.strftime("%H:%M")} to {end.strftime("%H:%M")} ' \
+                       f'saved by <@{action["user"]["id"]}>'
+    response['channel'] = action['submission']['channel']
+
+    await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)

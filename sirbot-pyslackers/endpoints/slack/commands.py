@@ -14,6 +14,7 @@ def create_endpoints(plugin):
     plugin.on_command('/sponsors', sponsors)
     plugin.on_command('/snippet', snippet)
     plugin.on_command('/report', report)
+    plugin.on_command('/save', save_conversation)
 
 
 async def sponsors(command, app):
@@ -205,6 +206,89 @@ async def tell_admin(command, app):
                     'name': 'message',
                     'type': 'textarea',
                     'value': command['text']
+                }
+            ]
+        }
+    }
+
+    await app.plugins['slack'].api.query(url=methods.DIALOG_OPEN, data=data)
+
+
+async def save_conversation(command, app):
+
+    data = {
+        'trigger_id': command['trigger_id'],
+        'dialog': {
+            'callback_id': 'save_conversation',
+            'title': 'Save conversation',
+            'elements': [
+                {
+                    'label': 'Channel',
+                    'name': 'channel',
+                    'type': 'select',
+                    'value': command['channel_id'],
+                    'data_source': 'channels',
+                },
+                {
+                    'label': 'Start',
+                    'name': 'start',
+                    'type': 'select',
+                    'options': [
+                        {
+                            'label': '2 minutes ago',
+                            'value': 2 * 60
+                        },
+                        {
+                            'label': '5 minutes ago',
+                            'value': 5 * 60
+                        },
+                        {
+                            'label': '10 minutes ago',
+                            'value': 10 * 60
+                        },
+                        {
+                            'label': '15 minutes ago',
+                            'value': 15 * 60
+                        },
+                        {
+                            'label': '30 minutes ago',
+                            'value': 30 * 60
+                        }
+                    ]
+                },
+                {
+                    'label': 'End',
+                    'name': 'end',
+                    'type': 'select',
+                    'options': [
+                        {
+                            'label': 'now',
+                            'value': 0
+                        },
+                        {
+                            'label': '2 minutes ago',
+                            'value': 2 * 60
+                        },
+                        {
+                            'label': '5 minutes ago',
+                            'value': 5 * 60
+                        },
+                        {
+                            'label': '10 minutes ago',
+                            'value': 10 * 60
+                        },
+                        {
+                            'label': '15 minutes ago',
+                            'value': 15 * 60
+                        },
+                    ]
+                },
+                {
+                    'label': 'Comment',
+                    'name': 'comment',
+                    'type': 'textarea',
+                    'value': command['text'],
+                    'optional': True
                 }
             ]
         }
