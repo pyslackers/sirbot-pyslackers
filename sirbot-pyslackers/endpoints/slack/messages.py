@@ -23,11 +23,60 @@ def create_endpoints(plugin):
     plugin.on_message('.*', channel_topic, subtype='channel_topic')
     plugin.on_message('g#', github_repo_link)
     plugin.on_message('^inspect', inspect, flags=re.IGNORECASE, mention=True, admin=True)
+    plugin.on_message('^help', help_message, flags=re.IGNORECASE)
 
 
 async def hello(message, app):
     response = message.response()
     response['text'] = 'Hello <@{user}>'.format(user=message['user'])
+    await app['plugins']['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def help_message(message, app):
+    response = message.response()
+    response['text'] = 'Sir Bot-a-lot help'
+    response['attachments'] = [
+        {
+            'color': 'good',
+            'fields': [
+                {
+                    'title': '@sir_botalot hello',
+                    'value': f'Say hello to sir_botalot.',
+                    'short': True
+                },
+                {
+                    'title': '/report',
+                    'value': 'Report an offending user to the admin team.',
+                    'short': True
+                },
+                {
+                    'title': '/gif search terms',
+                    'value': 'Search for a gif on giphy.com .',
+                    'short': True
+                },
+                {
+                    'title': '/pypi search terms',
+                    'value': 'Search for packages on pypi.org .',
+                    'short': True
+                },
+                {
+                    'title': '/sponsors',
+                    'value': 'Referal links from our sponsors.',
+                    'short': True
+                },
+                {
+                    'title': '/snippet',
+                    'value': 'Instruction on creating a slack code snippet.',
+                    'short': True
+                },
+                {
+                    'title': 'g#user/repo',
+                    'value': 'Share the link to that github repo. User default to `pyslackers`.',
+                }
+            ]
+        }
+    ]
+
     await app['plugins']['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
 
 
