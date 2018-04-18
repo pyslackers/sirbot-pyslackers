@@ -385,8 +385,10 @@ async def save_conversation(action, app):
 
     async with app['plugins']['pg'].connection() as pg_con:
         await pg_con.execute(
-            '''INSERT INTO slack.recordings (start, "end", "user", channel, comment) VALUES ($1, $2, $3, $4, $5)''',
-            start, end, action['user']['id'], action['submission']['channel'], action['submission']['comment']
+            '''INSERT INTO slack.recordings (start, "end", "user", channel, comment, title)
+               VALUES ($1, $2, $3, $4, $5, $6)''',
+            start, end, action['user']['id'], action['submission']['channel'], action['submission']['comment'],
+            action['submission']['title']
         )
 
     response = Message()

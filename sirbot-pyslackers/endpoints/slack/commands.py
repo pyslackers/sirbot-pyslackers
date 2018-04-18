@@ -223,6 +223,13 @@ async def save_conversation(command, app):
             'title': 'Save conversation',
             'elements': [
                 {
+                    'label': 'Title',
+                    'name': 'title',
+                    'type': 'text',
+                    'value': command['text'],
+
+                },
+                {
                     'label': 'Channel',
                     'name': 'channel',
                     'type': 'select',
@@ -249,6 +256,14 @@ async def save_conversation(command, app):
                         {
                             'label': '15 minutes ago',
                             'value': 15 * 60
+                        },
+                        {
+                            'label': '20 minutes ago',
+                            'value': 20 * 60
+                        },
+                        {
+                            'label': '25 minutes ago',
+                            'value': 25 * 60
                         },
                         {
                             'label': '30 minutes ago',
@@ -281,6 +296,14 @@ async def save_conversation(command, app):
                             'label': '15 minutes ago',
                             'value': 15 * 60
                         },
+                        {
+                            'label': '20 minutes ago',
+                            'value': 20 * 60
+                        },
+                        {
+                            'label': '25 minutes ago',
+                            'value': 25 * 60
+                        }
                     ]
                 },
                 {

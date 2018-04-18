@@ -19,7 +19,7 @@ from .plugins import PypiPlugin, GiphyPlugin, DeployPlugin
 
 PORT = 9000
 HOST = '127.0.0.1'
-VERSION = '0.0.10'
+VERSION = '0.0.11'
 LOG = logging.getLogger(__name__)
 
 
