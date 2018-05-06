@@ -1,59 +1,30 @@
 ---
 language: python
+python:
+  - 3.6
 
 services: docker
 
-env:
-  - distro=debian8
-  - distro=debian9
-  - distro=ubuntu1604
-  - distro=ubuntu1804
-
-python:
-  - '3.6'
-  - 3.7-dev
-
-matrix:
-  fast_finish: true
-  allow_failures:
-    - python: 3.7-dev
+addons:
+  apt:
+    update: true
 
 install:
-  # Python testing
-  - pip install flake8
-
-  # Ansible testing
-  - export container_id=$(date +%s)
-  - idempotence=$(mktemp)
-
-  # Build and run docker container
-  - docker run --detach --volume="$TRAVIS_BUILD_DIR":/opt/sirbot-pyslackers:rw --name $container_id --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro geerlingguy/docker-$distro-ansible:latest /lib/systemd/systemd
-  - docker exec --tty ${container_id} env TERM=xterm mv /opt/sirbot-pyslackers/ansible/test/ansible.cfg ansible.cfg
-  - docker exec --tty ${container_id} env TERM=xterm apt-get update -qq
-  - docker exec --tty ${container_id} env TERM=xterm apt-get upgrade -y
-  - docker ps
+  - docker build -f Dockerfile -t pyslackers/sirbot-pyslackers:$TRAVIS_COMMIT -t pyslackers/sirbot-pyslackers:latest .
 
 script:
-  # Python testing
-  - flake8
-
-  # Run playbook.
-  - docker exec --tty $container_id env TERM=xterm ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml --syntax-check
-  - 'if [ ${TRAVIS_PULL_REQUEST} != "false" ]; then
-        docker exec $container_id env TERM=xterm env ANSIBLE_FORCE_COLOR=1 ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml -vvv -e sirbot_version=$TRAVIS_PULL_REQUEST_SHA -e sirbot_repo=https://github.com/$TRAVIS_PULL_REQUEST_SLUG.git;
-        docker exec $container_id ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml -e sirbot_version=$TRAVIS_PULL_REQUEST_SHA -e sirbot_repo=https://github.com/$TRAVIS_PULL_REQUEST_SLUG.git | tee -a $idempotence;
-     else
-        docker exec $container_id env TERM=xterm env ANSIBLE_FORCE_COLOR=1 ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml -vvv -e sirbot_version=$TRAVIS_COMMIT -e sirbot_repo=https://github.com/$TRAVIS_REPO_SLUG.git;
-        docker exec $container_id ansible-playbook /opt/sirbot-pyslackers/ansible/test/test.yml -e sirbot_version=$TRAVIS_COMMIT -e sirbot_repo=https://github.com/$TRAVIS_REPO_SLUG.git | tee -a $idempotence;
-     fi'
-  - tail $idempotence | grep -q 'changed=0.*failed=0' && (printf 'Idempotence test pass') || (printf 'Idempotence test fail' && exit 1)
+  - docker run pyslackers/sirbot-pyslackers:$TRAVIS_COMMIT /bin/sh -c "pipenv install --dev --system --deploy && tox"
 
 deploy:
-  provider: script
-  script: scripts/deploy.sh
-  on:
-    branch: master
-    tags: false
-    repo: pyslackers/sirbot-pyslackers
-    python: '3.6'
-    condition: "$distro = debian9"
+    - provider: script
+      script: scripts/docker_push.sh
+      on:
+        branch: master
+        tags: false
+        repo: pyslackers/sirbot-pyslackers
+    - provider: script
+      script: scripts/deploy.sh
+      on:
+        branch: master
+        tags: false
+        repo: pyslackers/sirbot-pyslackers

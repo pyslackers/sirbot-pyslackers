@@ -17,8 +17,8 @@ from sirbot.plugins.readthedocs import RTDPlugin
 from . import endpoints
 from .plugins import PypiPlugin, GiphyPlugin, DeployPlugin
 
-PORT = 9000
-HOST = '127.0.0.1'
+PORT = os.environ.get('SIRBOT_PORT', 9000)
+HOST = os.environ.get('SIRBOT_ADDR', '127.0.0.1')
 VERSION = '0.0.11'
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def make_sentry_logger():
 
 if __name__ == '__main__':
     try:
-        with open(os.path.join(os.getcwd(), 'logging.yml')) as log_configfile:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../logging.yml')) as log_configfile:
             logging.config.dictConfig(yaml.load(log_configfile.read()))
 
     except Exception as e:
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     deploy = DeployPlugin()
     bot.load_plugin(deploy)
 
-    scheduler = APSchedulerPlugin()
+    scheduler = APSchedulerPlugin(timezone='UTC')
     endpoints.apscheduler.create_jobs(scheduler, bot)
     bot.load_plugin(scheduler)
 
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     if 'POSTGRES_DSN' in os.environ:
         postgres = PgPlugin(
             version=VERSION,
-            sql_migration_directory='/opt/sirbot/sql',
+            sql_migration_directory=os.path.join(os.path.dirname(os.path.realpath(__file__)), '../sql'),
             dsn=os.environ['POSTGRES_DSN']
         )
         bot.load_plugin(postgres)

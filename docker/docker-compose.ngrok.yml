@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  ngrok:
+    image: wernight/ngrok:latest
+    environment:
+      - NGROK_PORT=sirbot:9000
+    ports:
+      - 127.0.0.1:4040:4040
+
+  db:
+    image: postgres:latest
+    volumes:
+      - db:/var/lib/postgresql/data
+    env_file:
+      - example.env
+    expose:
+      - 5432
+    ports:
+      - 127.0.0.1:5432:5432
+
+  sirbot:
+    build: ../
+    env_file:
+      - example.env
+      - sirbot.env
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - 127.0.0.1:9000:9000
+    expose:
+      - 9000
+
+volumes:
+  db:

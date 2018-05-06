@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    image: traefik:latest
+    command: --api --docker
+    ports:
+      - 0.0.0.0:80:80
+      - 0.0.0.0:443:443
+      - 127.0.0.1:8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.enable=false"
+  
+  sirbot:
+    image: pyslackers/sirbot-pyslackers:latest
+    env_file:
+      - /etc/sirbot/.env
+    restart: unless-stopped
+    expose:
+      - 9000
+    labels:
+      - "traefik.frontend.rule=Host:sirbot.pyslackers.com"
+
+volumes:
+  db:

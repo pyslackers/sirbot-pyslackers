@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+aiohttp = "*"
+aiohttp-xmlrpc = "*"
+distance = "*"
+gidgethub = "*"
+raven = "*"
+slack-sansio = {git = "https://github.com/pyslackers/slack-sansio.git", ref = "bb0c5220f7446d39a3dd149352a880ad79da42c0"}
+asyncpg = "*"
+sirbot = {git = "https://github.com/pyslackers/sir-bot-a-lot-2.git", ref = "408432adda7c4f61c6b3a538ed828162dcab0c72"}
+pyyaml = "*"
+
+[dev-packages]
+ansible = "*"
+tox = "*"
+cryptography = "*"
+"flake8" = "*"
+docker-compose = "*"
+
+[requires]
+python_version = "3.6"
