@@ -24,9 +24,10 @@
     dest: /etc/sirbot/traefik.toml
 
 - name: Acme configuration
-  file:
-    path: /etc/sirbot/acme.json
-    state: file
+  copy:
+    content: ""
+    dest: /etc/sirbot/acme.json
+    force: no
     owner: root
     group: root
     mode: 0600
