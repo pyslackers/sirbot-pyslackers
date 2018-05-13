@@ -47,6 +47,7 @@
     method: POST
     body:
       item: sirbot
+      repo: https://github.com/pyslackers/sirbot-pyslackers
       token: "{{ sirbot_environment['deploy_token'] }}"
       version: "{{ sirbot_version }}"
     body_format: json
