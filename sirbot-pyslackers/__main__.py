@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 def make_sentry_logger():
     client = raven.Client(
         dsn=os.environ['SENTRY_DSN'],
-        release=raven.fetch_git_sha(os.path.join(os.path.dirname(__file__), os.pardir)),
+        release=os.environ['SIRBOT_VERSION'],
         processor=SanitizePasswordsProcessor
     )
     handler = SentryHandler(client)
