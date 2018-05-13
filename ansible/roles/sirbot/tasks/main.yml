@@ -41,6 +41,10 @@
         src: /etc/sirbot
         pull: True
 
+- name: Wait for startup
+  pause:
+    seconds: 5
+
 - name: Successful deploy
   uri:
     url: "https://{{ sirbot_host }}/pyslackers/deploy"
