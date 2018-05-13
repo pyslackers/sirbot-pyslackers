@@ -11,6 +11,3 @@
     - role: sirbot
       tags:
         - deploy
-    - role: pyslackers.nginx
-      tags:
-        - nginx

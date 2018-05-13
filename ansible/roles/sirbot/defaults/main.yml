@@ -1,11 +1,5 @@
 ---
-sirbot_path: /opt/sirbot
-sirbot_repo: https://github.com/pyslackers/sirbot-pyslackers.git
-sirbot_version: master
+
+sirbot_version: latest
 sirbot_environment: {}
-sirbot_python_version: 3.6.5
-
-sirbot_user: root
-sirbot_group: root
-
 notification: False

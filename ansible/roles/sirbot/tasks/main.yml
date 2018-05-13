@@ -1,36 +1,53 @@
 ---
 
-- name: "Clone sirbot {{ sirbot_version }}"
-  git:
-    repo: "{{ sirbot_repo }}"
-    dest: "{{ sirbot_path }}"
-    version: "{{ sirbot_version }}"
-    force: yes
-  register: clone
-  notify:
-    - Restart sirbot
-    - Successful deploy
+- name: Configuration directory
+  file:
+    path: /etc/sirbot
+    state: directory
 
-- name: Install python
-  include_role:
-    name: pyslackers.python
-  vars:
-    virtualenvs:
-      sirbot:
-        path: "{{ sirbot_path }}/.env"
-        version: "{{ sirbot_python_version }}"
-        requirements: "{{ sirbot_path }}/requirements.txt"
-  notify: Restart sirbot
-
-- name: Systemd service file
+- name: Environemnt
   template:
-    src: etc/systemd/system/service.j2
-    dest: /etc/systemd/system/sirbot.service
-  notify: Restart sirbot
+    src: etc/sirbot/env.j2
+    dest: /etc/sirbot/.env
+    owner: root
+    group: root
+    mode: 0600
 
-- name: Enable sirbot
-  systemd:
-    name: sirbot
-    state: started
-    enabled: yes
-    daemon-reload: yes
+- name: Docker configuration
+  copy:
+    src: ../../../../docker/docker-compose.prod.yml
+    dest: /etc/sirbot/docker-compose.yml
+
+- name: Traefik configuration
+  template:
+    src: ../../../../docker/traefik.toml.j2
+    dest: /etc/sirbot/traefik.toml
+
+- name: Acme configuration
+  file:
+    path: /etc/sirbot/acme.json
+    state: file
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Restart sirbot
+  include_role: 
+    name: pyslackers.docker
+  vars:
+    docker_services:
+      sirbot:
+        src: /etc/sirbot
+        pull: True
+
+- name: Successful deploy
+  uri:
+    url: "https://{{ sirbot_host }}/pyslackers/deploy"
+    method: POST
+    body:
+      item: sirbot
+      token: "{{ sirbot_environment['deploy_token'] }}"
+      version: "{{ sirbot_version }}"
+    body_format: json
+  when: notification
+  delegate_to: localhost

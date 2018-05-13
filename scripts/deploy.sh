@@ -11,7 +11,7 @@ echo -n "$ANSIBLE_PASSWORD" > .pass
 
 if [ $TRAVIS_EVENT_TYPE == 'cron' ]
 then
-    ansible-playbook playbook.yml --private-key=id_rsa
+    ansible-playbook playbook.yml --private-key=id_rsa -l sirbot.pyslackers.com
 else
-    ansible-playbook playbook.yml --private-key=id_rsa --tags="deploy" -e "notification=True" -e "sirbot_version=$TRAVIS_COMMIT"
+    ansible-playbook playbook.yml --private-key=id_rsa -l sirbot.pyslackers.com -e "notification=True" -e "sirbot_version=$TRAVIS_COMMIT"
 fi
