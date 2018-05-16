@@ -23,7 +23,7 @@ def create_endpoints(plugin):
     plugin.on_message('.*', channel_topic, subtype='channel_topic')
     plugin.on_message('g#', github_repo_link)
     plugin.on_message('^inspect', inspect, flags=re.IGNORECASE, mention=True, admin=True)
-    plugin.on_message('^help', help_message, flags=re.IGNORECASE)
+    plugin.on_message('^help', help_message, flags=re.IGNORECASE, mention=True)
 
 
 async def hello(message, app):
