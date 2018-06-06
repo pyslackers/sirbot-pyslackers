@@ -42,8 +42,8 @@
         pull: True
 
 - name: Wait for startup
-  pause:
-    seconds: 5
+  wait_for:
+    timeout: 5
   delegate_to: localhost
 
 - name: Successful deploy
