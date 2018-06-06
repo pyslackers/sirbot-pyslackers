@@ -11,4 +11,4 @@ ADD Pipfil* /sirbot/
 RUN pipenv install --system --deploy
 
 ADD . /sirbot
-CMD python3 -m sirbot-pyslackers
+ENTRYPOINT [ "python3", "-m", "sirbot-pyslackers" ]
