@@ -540,9 +540,9 @@
         },
         "texttable": {
             "hashes": [
-                "sha256:5edd1f7bfb8ea5308b60448c098fcf9f85bdaa4893a9a5efcd6c57464c1ee6ac"
+                "sha256:0f75f5838b775bddc19f72c5bf50eb74be3815eb505ed3084e4666ce2e6c3259"
             ],
-            "version": "==1.3.0"
+            "version": "==1.3.1"
         },
         "tox": {
             "hashes": [
