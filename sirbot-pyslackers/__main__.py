@@ -15,7 +15,12 @@ from sirbot.plugins.apscheduler import APSchedulerPlugin
 from sirbot.plugins.readthedocs import RTDPlugin
 
 from . import endpoints
-from .plugins import PypiPlugin, GiphyPlugin, DeployPlugin
+from .plugins import (
+    DeployPlugin,
+    GiphyPlugin,
+    PypiPlugin,
+    StocksPlugin,
+)
 
 PORT = os.environ.get('SIRBOT_PORT', 9000)
 HOST = os.environ.get('SIRBOT_ADDR', '127.0.0.1')
@@ -64,6 +69,9 @@ if __name__ == '__main__':
 
     deploy = DeployPlugin()
     bot.load_plugin(deploy)
+
+    stocks = StocksPlugin()
+    bot.load_plugin(stocks)
 
     scheduler = APSchedulerPlugin(timezone='UTC')
     endpoints.apscheduler.create_jobs(scheduler, bot)

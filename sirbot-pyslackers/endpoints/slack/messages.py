@@ -1,8 +1,9 @@
-import re
-import json
-import pprint
-import logging
 import datetime
+import json
+import logging
+import pprint
+import re
+from decimal import Decimal
 
 from slack import methods
 from slack.events import Message
@@ -12,6 +13,7 @@ from asyncpg.exceptions import UniqueViolationError
 from .utils import ADMIN_CHANNEL
 
 LOG = logging.getLogger(__name__)
+STOCK_REGEX = re.compile('\$(?P<ticker>[A-Z\.]{1,5})')
 TELL_REGEX = re.compile('tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)')
 
 
@@ -24,6 +26,66 @@ def create_endpoints(plugin):
     plugin.on_message('g#', github_repo_link)
     plugin.on_message('^inspect', inspect, flags=re.IGNORECASE, mention=True, admin=True)
     plugin.on_message('^help', help_message, flags=re.IGNORECASE, mention=True)
+    # stock tickers are 1-5 capital characters, with a dot allowed. To keep
+    # this from triggering with random text we require a leading '$'
+    plugin.on_message('\$[A-Z\.]{1,5}', stock_quote)
+
+
+async def stock_quote(message, app):
+    match = STOCK_REGEX.search(message.get('text', ''))
+    if not match:
+        return
+
+    response = message.response()
+    ticker = match.group('ticker')
+
+    r = await app['plugins']['stocks'].quote_daily(ticker)
+    time_series = r['Time Series (Daily)']
+    date, values = list(time_series.items())[0]
+    response['text'] = 'Stock prices for {} as of {}'.format(ticker, date)
+    # strip off the stupid leading number, period and space...
+    values = {k[3:]: Decimal(v) for k, v in values.items()}
+
+    color = 'gray'
+    if values['close'] > values['open']:
+        color = 'good'
+    elif values['close'] < values['open']:
+        color = 'danger'
+
+    response['attachments'] = [
+        {
+            'color': color,
+            'fields': [
+                {
+                    'title': 'Open',
+                    'value': f'${values["open"]:,.4f}',
+                    'short': True,
+                },
+                {
+                    'title': 'Close',
+                    'value': f'${values["close"]:,.4f}',
+                    'short': True,
+                },
+                {
+                    'title': 'Low',
+                    'value': f'${values["low"]:,.4f}',
+                    'short': True,
+                },
+                {
+                    'title': 'High',
+                    'value': f'${values["high"]:,.4f}',
+                    'short': True,
+                },
+                {
+                    'title': 'Volume',
+                    'value': f'{values["volume"]:,}',
+                    'short': True,
+                },
+            ]
+        },
+    ]
+    await app['plugins']['slack'].api.query(url=methods.CHAT_POST_MESSAGE,
+                                            data=response)
 
 
 async def hello(message, app):
@@ -72,7 +134,11 @@ async def help_message(message, app):
                 {
                     'title': 'g#user/repo',
                     'value': 'Share the link to that github repo. User default to `pyslackers`.',
-                }
+                },
+                {
+                    'title': '$TICKER',
+                    'value': 'Retrieve today\'s prices for the provided stock ticker.',
+                },
             ]
         }
     ]
@@ -100,7 +166,6 @@ async def tell(message, app):
 
 
 async def mention(message, app):
-
     try:
         if message['user'] != app['plugins']['slack'].bot_user_id:
             await app['plugins']['slack'].api.query(url=methods.REACTIONS_ADD, data={
