@@ -3,12 +3,12 @@ import json
 import logging
 import pprint
 import re
-from decimal import Decimal
 
+from aiohttp import ClientResponseError
+from asyncpg.exceptions import UniqueViolationError
 from slack import methods
 from slack.events import Message
 from slack.exceptions import SlackAPIError
-from asyncpg.exceptions import UniqueViolationError
 
 from .utils import ADMIN_CHANNEL
 
@@ -28,7 +28,7 @@ def create_endpoints(plugin):
     plugin.on_message('^help', help_message, flags=re.IGNORECASE, mention=True)
     # stock tickers are 1-5 capital characters, with a dot allowed. To keep
     # this from triggering with random text we require a leading '$'
-    plugin.on_message('\$[A-Z\.]{1,5}', stock_quote)
+    plugin.on_message('\$[A-Z\.]{1,5}', stock_quote, wait=False)
 
 
 async def stock_quote(message, app):
@@ -36,54 +36,67 @@ async def stock_quote(message, app):
     if not match:
         return
 
-    response = message.response()
     ticker = match.group('ticker')
+    LOG.debug('Fetching stock quotes for ticker %s', ticker)
 
-    r = await app['plugins']['stocks'].quote_daily(ticker)
-    time_series = r['Time Series (Daily)']
-    date, values = list(time_series.items())[0]
-    response['text'] = 'Stock prices for {} as of {}'.format(ticker, date)
-    # strip off the stupid leading number, period and space...
-    values = {k[3:]: Decimal(v) for k, v in values.items()}
+    response = message.response()
+    try:
+        quote = (await app['plugins']['stocks'].book(ticker))['quote']
+    except ClientResponseError:
+        response['text'] = f'Unable to locate symbol `{ticker}` :disappointed:'
+    except KeyError:
+        response['text'] = f'Error parsing data.'
+    else:
+        change = quote['change']
+        color = 'gray'
+        if change > 0:
+            color = 'good'
+        elif change < 0:
+            color = 'danger'
 
-    color = 'gray'
-    if values['close'] > values['open']:
-        color = 'good'
-    elif values['close'] < values['open']:
-        color = 'danger'
-
-    response['attachments'] = [
-        {
-            'color': color,
-            'fields': [
+        response.update(
+            attachments=[
                 {
-                    'title': 'Open',
-                    'value': f'${values["open"]:,.4f}',
-                    'short': True,
+                    'color': color,
+                    'title': f'{quote["symbol"]} ({quote["companyName"]}): '
+                             f'${quote["latestPrice"]:,.4f}',
+                    'title_link': f'https://finance.yahoo.com/quote/{ticker}',
+                    'fields': [
+                        {
+                            'title': 'Open',
+                            'value': f'${quote["open"]:,.4f}',
+                            'short': True,
+                        },
+                        {
+                            'title': 'Close',
+                            'value': f'${quote["close"]:,.4f}',
+                            'short': True,
+                        },
+                        {
+                            'title': 'Low',
+                            'value': f'${quote["low"]:,.4f}',
+                            'short': True,
+                        },
+                        {
+                            'title': 'High',
+                            'value': f'${quote["high"]:,.4f}',
+                            'short': True,
+                        },
+                        {
+                            'title': 'Volume',
+                            'value': f'{quote["latestVolume"]:,}',
+                            'short': True,
+                        },
+                    ],
+                    'footer': f'Data provided for free by '
+                              f'<https://iextrading.com/developer|IEX>. View '
+                              f'<https://iextrading.com/api-exhibit-a/|'
+                              f'IEX\'s Terms of Use>.',
+                    'footer_icon': 'https://iextrading.com/apple-touch-icon.png',  # noqa
+                    'ts': quote['latestUpdate'] / 1000,
                 },
-                {
-                    'title': 'Close',
-                    'value': f'${values["close"]:,.4f}',
-                    'short': True,
-                },
-                {
-                    'title': 'Low',
-                    'value': f'${values["low"]:,.4f}',
-                    'short': True,
-                },
-                {
-                    'title': 'High',
-                    'value': f'${values["high"]:,.4f}',
-                    'short': True,
-                },
-                {
-                    'title': 'Volume',
-                    'value': f'{values["volume"]:,}',
-                    'short': True,
-                },
-            ]
-        },
-    ]
+            ],
+        )
     await app['plugins']['slack'].api.query(url=methods.CHAT_POST_MESSAGE,
                                             data=response)
 
