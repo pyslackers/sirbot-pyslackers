@@ -41,11 +41,15 @@ async def stock_quote(message, app):
 
     response = message.response()
     try:
-        quote = (await app['plugins']['stocks'].book(symbol))['quote']
-    except ClientResponseError:
-        response['text'] = f'Unable to locate symbol `{symbol}` :disappointed:'
-    except KeyError:
-        response['text'] = f'Error parsing data.'
+        stocks = app['plugins']['stocks']
+        quote = (await stocks.book(symbol))['quote']
+        logo = (await stocks.logo(symbol))['url']
+    except ClientResponseError as e:
+        if e.status == 404:
+            response['text'] = f'The symbol `{symbol}` could not be found.'
+        else:
+            LOG.error('Error retrieving stock quotes: %s', e)
+            response['text'] = 'Unable to retrieve quotes right now.'
     else:
         change = quote['change']
         color = 'gray'
@@ -58,6 +62,7 @@ async def stock_quote(message, app):
             attachments=[
                 {
                     'color': color,
+                    'thumb_url': logo,
                     'title': f'{quote["symbol"]} ({quote["companyName"]}): '
                              f'${quote["latestPrice"]:,.4f}',
                     'title_link': f'https://finance.yahoo.com/quote/{symbol}',

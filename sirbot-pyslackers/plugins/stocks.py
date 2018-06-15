@@ -15,3 +15,10 @@ class StocksPlugin:
         async with self.session.get(url) as r:
             r.raise_for_status()
             return await r.json()
+
+    async def logo(self, symbol: str):
+        """https://iextrading.com/developer/docs/#logo"""
+        url = self.API_ROOT + f'/stock/{symbol}/logo'
+        async with self.session.get(url) as r:
+            r.raise_for_status()
+            return await r.json()
