@@ -13,7 +13,7 @@ from slack.exceptions import SlackAPIError
 from .utils import ADMIN_CHANNEL
 
 LOG = logging.getLogger(__name__)
-STOCK_REGEX = re.compile('\$(?P<ticker>[A-Z\.]{1,5})')
+STOCK_REGEX = re.compile(r'\$\b(?P<symbol>[A-Z.]{1,5})\b')
 TELL_REGEX = re.compile('tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)')
 
 
@@ -28,7 +28,7 @@ def create_endpoints(plugin):
     plugin.on_message('^help', help_message, flags=re.IGNORECASE, mention=True)
     # stock tickers are 1-5 capital characters, with a dot allowed. To keep
     # this from triggering with random text we require a leading '$'
-    plugin.on_message('\$[A-Z\.]{1,5}', stock_quote, wait=False)
+    plugin.on_message('s\$[A-Z\.]{1,5}', stock_quote, wait=False)
 
 
 async def stock_quote(message, app):
@@ -36,14 +36,14 @@ async def stock_quote(message, app):
     if not match:
         return
 
-    ticker = match.group('ticker')
-    LOG.debug('Fetching stock quotes for ticker %s', ticker)
+    symbol = match.group('symbol')
+    LOG.debug('Fetching stock quotes for symbol %s', symbol)
 
     response = message.response()
     try:
-        quote = (await app['plugins']['stocks'].book(ticker))['quote']
+        quote = (await app['plugins']['stocks'].book(symbol))['quote']
     except ClientResponseError:
-        response['text'] = f'Unable to locate symbol `{ticker}` :disappointed:'
+        response['text'] = f'Unable to locate symbol `{symbol}` :disappointed:'
     except KeyError:
         response['text'] = f'Error parsing data.'
     else:
@@ -60,7 +60,7 @@ async def stock_quote(message, app):
                     'color': color,
                     'title': f'{quote["symbol"]} ({quote["companyName"]}): '
                              f'${quote["latestPrice"]:,.4f}',
-                    'title_link': f'https://finance.yahoo.com/quote/{ticker}',
+                    'title_link': f'https://finance.yahoo.com/quote/{symbol}',
                     'fields': [
                         {
                             'title': 'Open',
@@ -149,7 +149,7 @@ async def help_message(message, app):
                     'value': 'Share the link to that github repo. User default to `pyslackers`.',
                 },
                 {
-                    'title': '$TICKER',
+                    'title': 's$TICKER',
                     'value': 'Retrieve today\'s prices for the provided stock ticker.',
                 },
             ]
