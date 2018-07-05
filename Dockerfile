@@ -1,4 +1,4 @@
-FROM python:alpine
+FROM python:3.7-alpine
 
 ENV PYTHONUNBUFFERED 1
 ENV PIP_NO_CACHE_DIR 0

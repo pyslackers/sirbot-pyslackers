@@ -12,7 +12,10 @@ raven = "*"
 slack-sansio = {git = "https://github.com/pyslackers/slack-sansio.git", ref = "bb0c5220f7446d39a3dd149352a880ad79da42c0"}
 asyncpg = "*"
 sirbot = {git = "https://github.com/pyslackers/sir-bot-a-lot-2.git", ref = "408432adda7c4f61c6b3a538ed828162dcab0c72"}
-pyyaml = "*"
+pyyaml = {ref = "a9c28e0b521967f5330f0316edd90a57f99cdd32", git = "https://github.com/yaml/pyyaml.git"}
+idna-ssl = {version = "*", markers = "python_version == '<3.7'"}
+cython = "*"
+cchardet = "*"
 
 [dev-packages]
 ansible = "*"
@@ -22,4 +25,4 @@ cryptography = "*"
 docker-compose = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
