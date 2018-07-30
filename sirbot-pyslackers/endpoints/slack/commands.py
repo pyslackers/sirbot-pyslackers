@@ -185,10 +185,12 @@ async def snippet(command, app):
     response['channel'] = command['channel_id']
     response['unfurl_links'] = False
 
-    response['text'] = 'Please use the snippet feature when sharing code. You can do so by ' \
-                       'clicking on the :heavy_plus_sign: on the left of the input box.\n'\
-                       'For more information click ' \
-                       '<https://get.slack.help/hc/en-us/articles/204145658-Create-a-snippet|here>.'
+    response['text'] = 'Please use the snippet feature, or backticks, when sharing code. You can do so by ' \
+                       'clicking on the :heavy_plus_sign: on the left of the input box for a snippet.\n'\
+                       'For more information on snippets click ' \
+                       '<https://get.slack.help/hc/en-us/articles/204145658-Create-a-snippet|here>.\n' \
+                       'For more information on inline code formatting with backticks click ' \
+                       '<https://get.slack.help/hc/en-us/articles/202288908-Format-your-messages#inline-code|here>.'
 
     await app.plugins['slack'].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
 
