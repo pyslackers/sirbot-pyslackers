@@ -5,6 +5,7 @@ import datetime
 
 from slack import methods
 from slack.events import Message
+from slack.exceptions import SlackAPIError
 from aiohttp.web import json_response
 
 from .utils import ADMIN_CHANNEL
@@ -281,10 +282,14 @@ async def pin_added_revert(action, app):
     else:
         raise TypeError(f'Unknown pin type: {action_data["type"]}')
 
-    await app.plugins['slack'].api.query(
-        url=methods.PINS_REMOVE,
-        data=remove_data
-    )
+    try:
+        await app.plugins['slack'].api.query(
+            url=methods.PINS_REMOVE,
+            data=remove_data
+        )
+    except SlackAPIError as e:
+        if e.error != 'no_pin':
+            raise
 
     await app.plugins['slack'].api.query(url=action['response_url'], data=response)
 
