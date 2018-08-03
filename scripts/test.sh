@@ -1,22 +1,16 @@
 #!/bin/sh
 
-echo "Running black"
-if black --check --diff .; then
-    echo "Black OK"
-else
-    echo "Black FAILED"
-fi
+EXIT=0
 
-echo "Running isort"
-if isort --recursive --check-only .; then
-    echo "Isort OK"
-else
-    echo "Isort FAILED"
-fi
+echo "TEST: black"
+black --check --diff . || EXIT=$?
 
-echo "Running flake8"
-if flake8 .; then
-    echo "Flake8 OK"
-else
-    echo "Flake8 FAILED"
-fi
+echo "TEST: isort"
+isort --recursive --check-only . || EXIT=$?
+
+export PYTHONWARNINGS="ignore"
+echo "TEST: flake8"
+flake8 . || EXIT=$?
+export PYTHONWARNINGS="default"
+
+exit $EXIT
