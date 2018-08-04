@@ -7,6 +7,10 @@ Bot built with `Sir Bot-a-lot <https://github.com/pyslackers/sir-bot-a-lot-2>`_ 
     :target: https://travis-ci.org/pyslackers/sirbot-pyslackers
     :alt: Travis-ci status
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/ambv/black
+   :alt: Code-style: black
+
 Features
 --------
 
@@ -15,6 +19,13 @@ Features
 * Monitor github activity on the pyslackers organization.
 * Monitor community projects documentation build status on `readthedocs.org <https://readthedocs.org>`_.
 * Monitor the slack community for easier administration.
+
+Contributing
+------------
+
+Contributions are welcome by anybody and everybody. We are not kidding! Looking for help ? Join us !
+
+For contributing guidelines please read the `contributing.rst <CONTRIBUTING.rst>`_ file.
 
 Join Us
 -------

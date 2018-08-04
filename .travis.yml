@@ -10,7 +10,7 @@ addons:
     update: true
 
 install:
-  - docker build -f Dockerfile -t pyslackers/sirbot-pyslackers:$TRAVIS_COMMIT -t pyslackers/sirbot-pyslackers:latest .
+  - docker build -f docker/dockerfile -t pyslackers/sirbot-pyslackers:$TRAVIS_COMMIT -t pyslackers/sirbot-pyslackers:latest .
 
 script:
   - docker run --entrypoint scripts/test.sh pyslackers/sirbot-pyslackers:$TRAVIS_COMMIT
