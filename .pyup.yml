@@ -1,3 +1,5 @@
+schedule: "every two weeks on monday"
+
 requirements:
   - Pipfile
   - Pipfile.lock
