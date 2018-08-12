@@ -62,7 +62,9 @@ If you are proposing a feature:
 Get started
 -----------
 
-Sirbot is built with docker in mind. It is deployed using a docker container, testing should be perform on docker containers as well.
+Sirbot is build using pipenv for dependencies management and deployed as docker container. Some custom pipenv command are setup to ease the development workflow.
+
+Before starting make sure ``docker`` and ``pipenv`` is installed.
 
 Environment setup
 ^^^^^^^^^^^^^^^^^
@@ -77,7 +79,7 @@ To test the bot it is required to create a development slack team and an app tha
 Deploy a development bot
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-To deploy a development version of the bot on your own machine use the `dev.sh <dev.sh>`_ script. It will start a docker stack composed of:
+To deploy a development version of the bot on your own machine use the ``pipenv run up`` command. It will start a docker stack composed of:
 
 * The bot container
 * A postgresql database
@@ -85,7 +87,11 @@ To deploy a development version of the bot on your own machine use the `dev.sh <
 
 Connect to `http://localhost:4040 <http://localhost:4040>`_ to access the ngrok management interface and find your url.
 
+After making some modification rebuild and restart the bot container using the same ``pipenv run up`` command.
+
+To shutdown all started containers use the ``pipenv run down`` command.
+
 Code style testing
 ^^^^^^^^^^^^^^^^^^
 
-To run the CI tests use the `test.sh <test.sh>`_ script. It will build a new docker image and run tests on it.
+To run the CI tests use the ``pipenv run tests`` command. It will build a new docker image and run tests on it.

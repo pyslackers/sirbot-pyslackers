@@ -27,3 +27,8 @@ python_version = "3.7"
 
 [pipenv]
 allow_prereleases = true
+
+[scripts]
+up = "/bin/sh scripts/dev_up.sh"
+down = "/bin/sh scripts/dev_down.sh"
+tests = "/bin/sh scripts/run_tests.sh"
