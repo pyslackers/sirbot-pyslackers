@@ -1,4 +1,5 @@
 import json
+import asyncio
 import logging
 import datetime
 
@@ -31,6 +32,7 @@ def create_endpoints(plugin):
     plugin.on_action("report", report)
     plugin.on_action("tell_admin", tell_admin)
     plugin.on_action("save_conversation", save_conversation)
+    plugin.on_action("make_snippet", make_snippet)
 
 
 async def gif_search_ok(action, app):
@@ -408,3 +410,31 @@ async def save_conversation(action, app):
     response["channel"] = action["submission"]["channel"]
 
     await app.plugins["slack"].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def make_snippet(action, app):
+
+    if not action["message"]["text"].startswith("```"):
+        response = Message()
+        response["channel"] = action["channel"]["id"]
+        response["text"] = f"""```{action["message"]["text"]}```"""
+
+        tip_message = Message()
+        tip_message["channel"] = action["channel"]["id"]
+        tip_message["user"] = action["message"]["user"]
+        tip_message[
+            "text"
+        ] = "Please use the snippet feature, or backticks, when sharing code. You can do so by " "clicking on the :heavy_plus_sign: on the left of the input box for a snippet.\n" "For more information on snippets click " "<https://get.slack.help/hc/en-us/articles/204145658-Create-a-snippet|here>.\n" "For more information on inline code formatting with backticks click " "<https://get.slack.help/hc/en-us/articles/202288908-Format-your-messages#inline-code|here>."
+
+        await asyncio.gather(
+            app.plugins["slack"].api.query(
+                url=methods.CHAT_POST_EPHEMERAL, data=tip_message
+            ),
+            app.plugins["slack"].api.query(
+                url=methods.CHAT_POST_MESSAGE, data=response
+            ),
+        )
+    else:
+        response = Message()
+        response["text"] = "Sorry I'm unable to format that message"
+        await app.plugins["slack"].api.query(url=action["response_url"], data=response)

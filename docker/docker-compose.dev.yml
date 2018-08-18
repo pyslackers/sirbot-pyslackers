@@ -28,7 +28,6 @@ services:
     env_file:
       - example.env
       - sirbot.env
-    restart: unless-stopped
     depends_on:
       - db
     ports:

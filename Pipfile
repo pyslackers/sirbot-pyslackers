@@ -9,7 +9,7 @@ aiohttp-xmlrpc = "*"
 distance = "*"
 gidgethub = "*"
 raven = "*"
-slack-sansio = {git = "https://github.com/pyslackers/slack-sansio.git", ref = "bb0c5220f7446d39a3dd149352a880ad79da42c0"}
+slack-sansio = "*"
 asyncpg = "*"
 sirbot = {git = "https://github.com/pyslackers/sir-bot-a-lot-2.git", ref = "408432adda7c4f61c6b3a538ed828162dcab0c72"}
 pyyaml = "*"
@@ -19,8 +19,8 @@ cchardet = "*"
 
 [dev-packages]
 "flake8" = "*"
-black = "*"
 isort = "*"
+black = "*"
 
 [requires]
 python_version = "3.7"
