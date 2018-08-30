@@ -2,6 +2,7 @@ import logging
 import datetime
 
 from slack import methods
+from slack.events import Message
 
 LOG = logging.getLogger(__name__)
 
@@ -22,6 +23,23 @@ def create_jobs(scheduler, bot):
 
     scheduler.scheduler.add_job(slack_channel_list, "cron", hour=1, kwargs={"bot": bot})
     scheduler.scheduler.add_job(slack_users_list, "cron", hour=2, kwargs={"bot": bot})
+    scheduler.scheduler.add_job(
+        etc_finance_bell,
+        "cron",
+        day="1-5",
+        hour=9,
+        minute=30,
+        timezone="America/New_York",
+        kwargs={"bot": bot, "state": "open"},
+    )
+    scheduler.scheduler.add_job(
+        etc_finance_bell,
+        "cron",
+        day="1-5",
+        hour=16,
+        timezone="America/New_York",
+        kwargs={"bot": bot, "state": "closed"},
+    )
 
 
 async def slack_channel_list(bot):
@@ -57,3 +75,23 @@ async def slack_users_list(bot):
                 user,
             )
     LOG.info("List of slack users up to date")
+
+
+async def etc_finance_bell(bot, state):
+    LOG.info("Posting opening bell to #etc_finance")
+
+    message = Message()
+
+    if state == "open":
+        message[
+            "text"
+        ] = """:bell: :bell: :bell: The US Stock Market is now OPEN for trading. :bell: :bell: :bell:"""
+
+    elif state == "closed":
+        message[
+            "text"
+        ] = """:bell: :bell: :bell: The US Stock Market is now CLOSED for trading. :bell: :bell: :bell:"""
+
+    message["channel"] = "etc_finance"
+
+    await bot["plugins"]["slack"].api.query(url=methods.CHAT_POST_MESSAGE, data=message)
