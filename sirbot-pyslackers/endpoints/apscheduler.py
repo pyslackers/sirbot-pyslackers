@@ -26,7 +26,7 @@ def create_jobs(scheduler, bot):
     scheduler.scheduler.add_job(
         etc_finance_bell,
         "cron",
-        day="1-5",
+        day_of_week="0-4",
         hour=9,
         minute=30,
         timezone="America/New_York",
@@ -35,7 +35,7 @@ def create_jobs(scheduler, bot):
     scheduler.scheduler.add_job(
         etc_finance_bell,
         "cron",
-        day="1-5",
+        day_of_week="0-4",
         hour=16,
         timezone="America/New_York",
         kwargs={"bot": bot, "state": "closed"},
