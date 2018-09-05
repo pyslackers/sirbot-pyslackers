@@ -78,20 +78,39 @@ async def slack_users_list(bot):
 
 
 async def etc_finance_bell(bot, state):
-    LOG.info("Posting opening bell to #etc_finance")
+    LOG.info("Posting %s bell to #etc_finance", state)
+
+    holidays = [
+        datetime.date(2018, 1, 1),
+        datetime.date(2018, 1, 15),
+        datetime.date(2018, 2, 19),
+        datetime.date(2018, 3, 30),
+        datetime.date(2018, 5, 28),
+        datetime.date(2018, 7, 4),
+        datetime.date(2018, 9, 3),
+        datetime.date(2018, 11, 22),
+        datetime.date(2018, 12, 25),
+    ]
 
     message = Message()
 
-    if state == "open":
+    message["channel"] = "etc_finance"
+
+    if datetime.date.today() in holidays:
         message[
             "text"
-        ] = """:bell: :bell: :bell: The US Stock Market is now OPEN for trading. :bell: :bell: :bell:"""
+        ] = """:bell: :bell: :bell: The US Stock Market is *CLOSED for holiday*. :bell: :bell: :bell:"""
+
+        state = "holiday"
+
+    elif state == "open":
+        message[
+            "text"
+        ] = """:bell: :bell: :bell: The US Stock Market is now *OPEN* for trading. :bell: :bell: :bell:"""
 
     elif state == "closed":
         message[
             "text"
-        ] = """:bell: :bell: :bell: The US Stock Market is now CLOSED for trading. :bell: :bell: :bell:"""
-
-    message["channel"] = "etc_finance"
+        ] = """:bell: :bell: :bell: The US Stock Market is now *CLOSED* for trading. :bell: :bell: :bell:"""
 
     await bot["plugins"]["slack"].api.query(url=methods.CHAT_POST_MESSAGE, data=message)
