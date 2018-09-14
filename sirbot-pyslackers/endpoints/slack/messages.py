@@ -70,6 +70,11 @@ async def stock_quote(message, app):
                     "title_link": f"https://finance.yahoo.com/quote/{symbol}",
                     "fields": [
                         {
+                            "title": "Change",
+                            "value": f'${quote["change"]:,.4f} ({quote["changePercent"] * 100:,.4f})',
+                            "short": True,
+                        },
+                        {
                             "title": "Open",
                             "value": f'${quote["open"]:,.4f}',
                             "short": True,
