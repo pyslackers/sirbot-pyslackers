@@ -46,6 +46,7 @@ async def stock_quote(message, app):
         stocks = app["plugins"]["stocks"]
         quote = (await stocks.book(symbol))["quote"]
         logo = (await stocks.logo(symbol))["url"]
+        LOG.debug("Quote from IEX API: %s", quote)
     except ClientResponseError as e:
         if e.status == 404:
             response["text"] = f"The symbol `{symbol}` could not be found."
@@ -53,7 +54,7 @@ async def stock_quote(message, app):
             LOG.error("Error retrieving stock quotes: %s", e)
             response["text"] = "Unable to retrieve quotes right now."
     else:
-        change = quote["change"]
+        change = quote.get("change", 0)
         color = "gray"
         if change > 0:
             color = "good"
@@ -71,7 +72,12 @@ async def stock_quote(message, app):
                     "fields": [
                         {
                             "title": "Change",
-                            "value": f'${quote["change"]:,.4f} ({quote["changePercent"] * 100:,.4f})',
+                            "value": f'${quote.get("change", 0):,.4f} (%{quote.get("changePercent", 0) * 100:,.4f})',
+                            "short": True,
+                        },
+                        {
+                            "title": "Volume",
+                            "value": f'{quote["latestVolume"]:,}',
                             "short": True,
                         },
                         {
@@ -81,7 +87,7 @@ async def stock_quote(message, app):
                         },
                         {
                             "title": "Close",
-                            "value": f'${quote["close"]:,.4f}',
+                            "value": f'${quote.get("close", 0):,.4f}',
                             "short": True,
                         },
                         {
@@ -94,18 +100,13 @@ async def stock_quote(message, app):
                             "value": f'${quote["high"]:,.4f}',
                             "short": True,
                         },
-                        {
-                            "title": "Volume",
-                            "value": f'{quote["latestVolume"]:,}',
-                            "short": True,
-                        },
                     ],
                     "footer": f"Data provided for free by "
                     f"<https://iextrading.com/developer|IEX>. View "
                     f"<https://iextrading.com/api-exhibit-a/|"
                     f"IEX's Terms of Use>.",
                     "footer_icon": "https://iextrading.com/apple-touch-icon.png",  # noqa
-                    "ts": quote["latestUpdate"] / 1000,
+                    "ts": quote.get("latestUpdate", 0) / 1000,
                 }
             ]
         )
