@@ -30,8 +30,10 @@ class GiphyPlugin:
         rep = await self.session.request("GET", url)
         data = await rep.json()
 
-        if data["meta"]["status"] != 200:
-            raise ConnectionError("Giphy response: %s", data)
+        if "meta" not in data or "status" not in data["meta"]:
+            raise ConnectionError("Invalid response: {}".format(data))
+        elif data["meta"]["status"] != 200:
+            raise ConnectionError("Giphy response: {}".format(data))
         return data
 
     async def search(self, *terms):
