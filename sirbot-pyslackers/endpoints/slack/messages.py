@@ -296,20 +296,25 @@ async def github_repo_link(message, app):
     if "text" in message and message["text"]:
         response = message.response()
 
-        start = message["text"].find("g#") + 2
-        repo = message["text"][start:].split()[0]
+        for i in range(0, message["text"].count("g#")):
+            start = message["text"].find("g#") + 2
+            repo = message["text"][start:].split()[0]
 
-        if "/" not in repo:
-            repo = "pyslackers/" + repo
+            # Remove occurrence so we don't use it again
+            len_to_remove = (start + len(repo)) + 2
+            message["text"] = message["text"][len_to_remove:]
 
-        url = f"https://github.com/{repo}"
-        r = await app["http_session"].request("GET", url)
+            if "/" not in repo:
+                repo = "pyslackers/" + repo
 
-        if r.status == 200:
-            response["text"] = url
-            await app["plugins"]["slack"].api.query(
-                url=methods.CHAT_POST_MESSAGE, data=response
-            )
+            url = f"https://github.com/{repo}"
+            r = await app["http_session"].request("GET", url)
+
+            if r.status == 200:
+                response["text"] = url
+                await app["plugins"]["slack"].api.query(
+                    url=methods.CHAT_POST_MESSAGE, data=response
+                )
 
 
 async def inspect(message, app):
