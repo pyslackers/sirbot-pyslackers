@@ -224,9 +224,10 @@ async def recording_emoji(action, app):
         if not exist:
             response["text"] = "Conversation not recorded. Please try again."
         else:
-            response[
-                "text"
-            ] = """*Could not find message with :stop_recording:*. \n\n""" """Would you like to record this conversation ?"""
+            response["text"] = (
+                """*Could not find message with :stop_recording:*. \n\n"""
+                """Would you like to record this conversation ?"""
+            )
             response["attachments"] = [
                 {
                     "fallback": "start recording",
@@ -404,9 +405,10 @@ async def save_conversation(action, app):
         )
 
     response = Message()
-    response[
-        "text"
-    ] = f'Conversation from {start.strftime("%H:%M")} to {end.strftime("%H:%M")} ' f'saved by <@{action["user"]["id"]}>'
+    response["text"] = (
+        f'Conversation from {start.strftime("%H:%M")} to {end.strftime("%H:%M")} '
+        f'saved by <@{action["user"]["id"]}>'
+    )
     response["channel"] = action["submission"]["channel"]
 
     await app.plugins["slack"].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
@@ -422,9 +424,14 @@ async def make_snippet(action, app):
         tip_message = Message()
         tip_message["channel"] = action["channel"]["id"]
         tip_message["user"] = action["message"]["user"]
-        tip_message[
-            "text"
-        ] = "Please use the snippet feature, or backticks, when sharing code. You can do so by " "clicking on the :heavy_plus_sign: on the left of the input box for a snippet.\n" "For more information on snippets click " "<https://get.slack.help/hc/en-us/articles/204145658-Create-a-snippet|here>.\n" "For more information on inline code formatting with backticks click " "<https://get.slack.help/hc/en-us/articles/202288908-Format-your-messages#inline-code|here>."
+        tip_message["text"] = (
+            "Please use the snippet feature, or backticks, when sharing code. You can do so by "
+            "clicking on the :heavy_plus_sign: on the left of the input box for a snippet.\n"
+            "For more information on snippets click "
+            "<https://get.slack.help/hc/en-us/articles/204145658-Create-a-snippet|here>.\n"
+            "For more information on inline code formatting with backticks click "
+            "<https://get.slack.help/hc/en-us/articles/202288908-Format-your-messages#inline-code|here>."
+        )
 
         await asyncio.gather(
             app.plugins["slack"].api.query(
