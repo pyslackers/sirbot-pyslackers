@@ -11,7 +11,7 @@ gidgethub = "*"
 raven = "*"
 slack-sansio = "*"
 asyncpg = "*"
-sirbot = {git = "https://github.com/pyslackers/sir-bot-a-lot-2.git", ref = "408432adda7c4f61c6b3a538ed828162dcab0c72"}
+sirbot = {ref = "408432adda7c4f61c6b3a538ed828162dcab0c72", git = "https://github.com/pyslackers/sir-bot-a-lot-2.git"}
 pyyaml = "*"
 idna-ssl = {version = "*", markers = "python_version == '<3.7'"}
 cython = "*"
