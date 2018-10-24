@@ -54,6 +54,8 @@ async def stock_quote(message, app):
             LOG.error("Error retrieving stock quotes: %s", e)
             response["text"] = "Unable to retrieve quotes right now."
     else:
+        # Sometimes the API returns None records. We remove them here.
+        quote = {k: v for k, v in quote.items() if v is not None}
         change = quote.get("change", 0)
         color = "gray"
         if change > 0:
