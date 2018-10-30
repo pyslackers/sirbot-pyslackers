@@ -31,6 +31,88 @@ def create_endpoints(plugin):
     # stock tickers are 1-5 capital characters, with a dot allowed. To keep
     # this from triggering with random text we require a leading '$'
     plugin.on_message("s\$[A-Z\.]{1,5}", stock_quote, wait=False)
+    plugin.on_message("c\$[A-Z\.]{1,5}", crypto_quote, wait=False)
+
+
+async def crypto_quote(message, app):
+    match = STOCK_REGEX.search(message.get("text", ""))
+    if not match:
+        return
+
+    symbol = match.group("symbol")
+    LOG.debug("Fetching crypto quotes for symbol %s", symbol)
+
+    response = message.response()
+    try:
+        stocks = app["plugins"]["stocks"]
+        crypto = await stocks.crypto()
+        quote = None
+        for c in crypto:
+            if c["symbol"] == f"{symbol}USDT":
+                quote = c
+                break
+        if quote is None:
+            response["text"] = f"The crypto symbol `{symbol}` could not be found"
+            LOG.debug("No crypto currencies found when searching for: %s", symbol)
+        LOG.debug("Crypto quote from IEX API: %s", quote)
+    except ClientResponseError as e:
+        LOG.error("Error retrieving crypto quotes: %s", e)
+    if quote is not None:
+        # Sometimes the API returns None records. We remove them here.
+        quote = {k: v for k, v in quote.items() if v is not None}
+        change = quote.get("change", 0)
+        color = "gray"
+        if change > 0:
+            color = "good"
+        elif change < 0:
+            color = "danger"
+
+        response.update(
+            attachments=[
+                {
+                    "color": color,
+                    "title": f'{quote["symbol"]} ({quote["companyName"]}): '
+                    f'${quote["latestPrice"]:,.4f}',
+                    "title_link": f"https://finance.yahoo.com/quote/{symbol}",
+                    "fields": [
+                        {
+                            "title": "Change",
+                            "value": f'${quote.get("change", 0):,.4f} ({quote.get("changePercent", 0) * 100:,.4f}%)',
+                            "short": True,
+                        },
+                        {
+                            "title": "Volume",
+                            "value": f'{quote["latestVolume"]:,}',
+                            "short": True,
+                        },
+                        {
+                            "title": "Low",
+                            "value": f'${quote["low"]:,.4f}',
+                            "short": True,
+                        },
+                        {
+                            "title": "High",
+                            "value": f'${quote["high"]:,.4f}',
+                            "short": True,
+                        },
+                        {
+                            "title": "Latest time of quote",
+                            "value": f'{quote["latestTime"]} EST',
+                            "short": True,
+                        },
+                    ],
+                    "footer": f"Data provided for free by "
+                    f"<https://iextrading.com/developer|IEX>. View "
+                    f"<https://iextrading.com/api-exhibit-a/|"
+                    f"IEX's Terms of Use>.",
+                    "footer_icon": "https://iextrading.com/apple-touch-icon.png",  # noqa
+                    "ts": quote.get("latestUpdate", 0) / 1000,
+                }
+            ]
+        )
+    await app["plugins"]["slack"].api.query(
+        url=methods.CHAT_POST_MESSAGE, data=response
+    )
 
 
 async def stock_quote(message, app):
@@ -74,7 +156,7 @@ async def stock_quote(message, app):
                     "fields": [
                         {
                             "title": "Change",
-                            "value": f'${quote.get("change", 0):,.4f} (%{quote.get("changePercent", 0) * 100:,.4f})',
+                            "value": f'${quote.get("change", 0):,.4f} ({quote.get("changePercent", 0) * 100:,.4f}%)',
                             "short": True,
                         },
                         {

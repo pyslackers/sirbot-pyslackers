@@ -22,3 +22,10 @@ class StocksPlugin:
         async with self.session.get(url) as r:
             r.raise_for_status()
             return await r.json()
+
+    async def crypto(self):
+        """https://iextrading.com/developer/docs/#crypto"""
+        url = self.API_ROOT + "/stock/market/crypto"
+        async with self.session.get(url) as r:
+            r.raise_for_status()
+            return await r.json()
