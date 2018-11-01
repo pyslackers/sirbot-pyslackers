@@ -82,22 +82,22 @@ async def crypto_quote(message, app):
                         },
                         {
                             "title": "Volume",
-                            "value": f'{quote["latestVolume"]:,}',
+                            "value": f'{quote.get("latestVolume", 0):,}',
                             "short": True,
                         },
                         {
                             "title": "Low",
-                            "value": f'${quote["low"]:,.4f}',
+                            "value": f'${quote.get("low", 0):,.4f}',
                             "short": True,
                         },
                         {
                             "title": "High",
-                            "value": f'${quote["high"]:,.4f}',
+                            "value": f'${quote.get("high", 0):,.4f}',
                             "short": True,
                         },
                         {
                             "title": "Latest time of quote",
-                            "value": f'{quote["latestTime"]} EST',
+                            "value": f'{quote.get("latestTime", "N/A")} EST',
                             "short": True,
                         },
                     ],
@@ -161,12 +161,12 @@ async def stock_quote(message, app):
                         },
                         {
                             "title": "Volume",
-                            "value": f'{quote["latestVolume"]:,}',
+                            "value": f'{quote.get("latestVolume", 0):,}',
                             "short": True,
                         },
                         {
                             "title": "Open",
-                            "value": f'${quote["open"]:,.4f}',
+                            "value": f'${quote.get("open", 0):,.4f}',
                             "short": True,
                         },
                         {
@@ -176,12 +176,12 @@ async def stock_quote(message, app):
                         },
                         {
                             "title": "Low",
-                            "value": f'${quote["low"]:,.4f}',
+                            "value": f'${quote.get("low", 0):,.4f}',
                             "short": True,
                         },
                         {
                             "title": "High",
-                            "value": f'${quote["high"]:,.4f}',
+                            "value": f'${quote("high", 0):,.4f}',
                             "short": True,
                         },
                     ],
