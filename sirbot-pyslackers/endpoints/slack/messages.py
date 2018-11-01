@@ -181,7 +181,7 @@ async def stock_quote(message, app):
                         },
                         {
                             "title": "High",
-                            "value": f'${quote("high", 0):,.4f}',
+                            "value": f'${quote.get("high", 0):,.4f}',
                             "short": True,
                         },
                     ],
