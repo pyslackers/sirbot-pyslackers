@@ -30,8 +30,8 @@ def create_endpoints(plugin):
     plugin.on_message("^help", help_message, flags=re.IGNORECASE, mention=True)
     # stock tickers are 1-5 capital characters, with a dot allowed. To keep
     # this from triggering with random text we require a leading '$'
-    plugin.on_message("s\$[A-Z\.]{1,5}", stock_quote, wait=False)
-    plugin.on_message("c\$[A-Z\.]{1,5}", crypto_quote, wait=False)
+    plugin.on_message(r"s\$[A-Z\.]{1,5}", stock_quote, wait=False)
+    plugin.on_message(r"c\$[A-Z\.]{1,5}", crypto_quote, wait=False)
 
 
 async def crypto_quote(message, app):
