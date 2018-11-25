@@ -9,12 +9,29 @@ LOG = logging.getLogger(__name__)
 
 def create_endpoints(plugin):
     plugin.on_command("/admin", tell_admin)
+    plugin.on_command("/howtoask", ask)
     plugin.on_command("/gif", gif_search)
     plugin.on_command("/pypi", pypi_search)
     plugin.on_command("/sponsors", sponsors)
     plugin.on_command("/snippet", snippet)
     plugin.on_command("/report", report)
     plugin.on_command("/save", save_conversation)
+
+
+async def ask(command, app):
+    slack = app.plugins["slack"]
+    response = Message()
+    response["channel"] = command["channel_id"]
+    response["unfurl_links"] = True
+
+    response["text"] = (
+        "Knowing how to ask a good question is a highly invaluable skill that will benefit you greatly in any career. "
+        "<https://stackoverflow.com/help/how-to-ask> is a good collection of suggestions and strategies to help you "
+        "structure and phrase your question to make it easier for those here to understand your problem and "
+        "help you work to a solution."
+    )
+
+    await slack.api.query(url=methods.CHAT_POST_MESSAGE, data=response)
 
 
 async def sponsors(command, app):
