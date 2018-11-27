@@ -9,8 +9,9 @@ LOG = logging.getLogger(__name__)
 
 def create_endpoints(plugin):
     plugin.on_command("/admin", tell_admin)
-    plugin.on_command("/howtoask", ask)
+    plugin.on_command("/howtoask", how_to_ask)
     plugin.on_command("/gif", gif_search)
+    plugin.on_command("/justask", just_ask)
     plugin.on_command("/pypi", pypi_search)
     plugin.on_command("/sponsors", sponsors)
     plugin.on_command("/snippet", snippet)
@@ -18,7 +19,22 @@ def create_endpoints(plugin):
     plugin.on_command("/save", save_conversation)
 
 
-async def ask(command, app):
+async def just_ask(command, app):
+    slack = app.plugins["slack"]
+    response = Message()
+    response["channel"] = command["channel_id"]
+    response["unfurl_links"] = False
+
+    response["text"] = (
+        "If you have a question, please just ask it. Please do not ask for topic experts;  "
+        "do not DM or ping random users. We cannot begin to answer a question until we actually get a question. \n\n"
+        "<http://sol.gfxile.net/dontask.html|*Asking Questions*>"
+    )
+
+    await slack.api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def how_to_ask(command, app):
     slack = app.plugins["slack"]
     response = Message()
     response["channel"] = command["channel_id"]
