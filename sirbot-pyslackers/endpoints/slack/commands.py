@@ -4,12 +4,15 @@ import logging
 from slack import methods
 from slack.events import Message
 
+from .utils import HELP_FIELD_DESCRIPTIONS
+
 LOG = logging.getLogger(__name__)
 
 
 def create_endpoints(plugin):
     plugin.on_command("/admin", tell_admin)
-    plugin.on_command("/howtoask", how_to_ask)
+    plugin.on_command("/sirbot", sirbot_help)
+    plugin.on_command("/howtoask", ask)
     plugin.on_command("/gif", gif_search)
     plugin.on_command("/justask", just_ask)
     plugin.on_command("/pypi", pypi_search)
@@ -34,7 +37,19 @@ async def just_ask(command, app):
     await slack.api.query(url=methods.CHAT_POST_MESSAGE, data=response)
 
 
-async def how_to_ask(command, app):
+async def sirbot_help(command, app):
+    slack = app.plugins["slack"]
+    response = Message()
+    response["channel"] = command["channel_id"]
+    response["unfurl_links"] = False
+
+    response["text"] = "Community Slack Commands"
+    response["attachments"] = [{"color": "good", "fields": HELP_FIELD_DESCRIPTIONS}]
+
+    await slack.api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def ask(command, app):
     slack = app.plugins["slack"]
     response = Message()
     response["channel"] = command["channel_id"]
