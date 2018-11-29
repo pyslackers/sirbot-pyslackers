@@ -326,7 +326,7 @@
         },
         "tzlocal": {
             "hashes": [
-                "sha256:2a58102b6cd59f760ff946eef8ae32a20b19eea26f0a1a50e5b8ed0e4f7efe63"
+                "sha256:4ebeb848845ac898da6519b9b31879cf13b6626f7184c496037b818e238f2c4e"
             ],
             "version": "==1.5.1"
         },
