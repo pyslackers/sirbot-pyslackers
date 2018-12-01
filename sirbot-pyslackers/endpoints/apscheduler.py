@@ -1,6 +1,7 @@
 import logging
 import datetime
 
+import pytz
 from slack import methods
 from slack.events import Message
 
@@ -40,6 +41,51 @@ def create_jobs(scheduler, bot):
         timezone="America/New_York",
         kwargs={"bot": bot, "state": "closed"},
     )
+    scheduler.scheduler.add_job(
+        advent_of_code,
+        "cron",
+        month=12,
+        day_of_month="1-25",
+        hour=0,
+        minute=0,
+        timezone="America/New_York",
+        kwargs={"bot": bot},
+    )
+
+
+async def advent_of_code(bot):
+    LOG.info("Creating Advent Of Code threads...")
+    for_day = datetime.datetime.now(tz=pytz.timezone("America/New_York"))
+    year, day = for_day.year, for_day.day
+    for part in range(1, 3):
+        message = Message()
+        message["channel"] = "advent_of_code"
+        message["attachments"] = [
+            {
+                "fallback": "Official {} Advent Of Code Thread for Day {} Part {}".format(
+                    year, day, part
+                ),
+                "color": ["#ff0000", "#378b29"][  # red  # green
+                    part // 1
+                ],  # red=part 1, green=part 2
+                "title": ":christmas_tree: {} Advent of Code Thread: Day {} Part {} :christmas_tree:".format(
+                    year, day, part
+                ),
+                "title_link": "https://adventofcode.com/{}/day/{}".format(year, day),
+                "text": (
+                    "Post solutions to part {} in this thread, in any language, to avoid spoilers!".format(
+                        part
+                    )
+                ),
+                "footer": "Advent of Code",
+                "footer_icon": "https://adventofcode.com/favicon.ico",
+                "ts": int(for_day.timestamp()),
+            }
+        ]
+
+        await bot["plugins"]["slack"].api.query(
+            url=methods.CHAT_POST_MESSAGE, data=message
+        )
 
 
 async def slack_channel_list(bot):
