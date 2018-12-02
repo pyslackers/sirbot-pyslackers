@@ -47,7 +47,7 @@ def create_jobs(scheduler, bot):
         month=12,
         day="1-25",
         hour=0,
-        minute=0,
+        minute=5,
         second=0,
         jitter=60,
         timezone="America/New_York",
@@ -68,7 +68,7 @@ async def advent_of_code(bot):
                     year, day, part
                 ),
                 "color": ["#ff0000", "#378b29"][  # red  # green
-                    part // 1
+                    (part - 1) // 1
                 ],  # red=part 1, green=part 2
                 "title": ":christmas_tree: {} Advent of Code Thread: Day {} Part {} :christmas_tree:".format(
                     year, day, part
