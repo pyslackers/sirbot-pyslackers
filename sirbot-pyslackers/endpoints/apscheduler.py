@@ -49,7 +49,6 @@ def create_jobs(scheduler, bot):
         hour=0,
         minute=5,
         second=0,
-        jitter=60,
         timezone="America/New_York",
         kwargs={"bot": bot},
     )
