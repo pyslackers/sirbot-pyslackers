@@ -76,7 +76,7 @@ async def sponsors(command, app):
         "<https://sentry.io|Sentry> for providing hosting & services helping us "
         "host our <https://www.pyslackers.com|website> and Sir Bot-a-lot.\n"
         "If you are planning on using one of those services please use our referral codes: \n"
-        "1. <https://m.do.co/c/457f0988c477|Digital Ocean referral code>\n"
+        "1. <https://m.do.co/c/b0c9197f680a|Digital Ocean referral code>\n"
         "2. <https://sentry.io/?utm_source=referral&utm_content=pyslackers&utm_campaign=community|"
         "Sentry referral code>."
     )
