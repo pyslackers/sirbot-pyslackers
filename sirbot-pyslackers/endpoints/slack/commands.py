@@ -56,10 +56,13 @@ async def ask(command, app):
     response["unfurl_links"] = True
 
     response["text"] = (
-        "Knowing how to ask a good question is a highly invaluable skill that will benefit you greatly in any career. "
-        "<https://stackoverflow.com/help/how-to-ask> is a good collection of suggestions and strategies to help you "
-        "structure and phrase your question to make it easier for those here to understand your problem and "
-        "help you work to a solution."
+        "Knowing how to ask a good question is a highly invaluable skill that "
+        "will benefit you greatly in any career. Two good resources for "
+        "suggestions and strategies to help you structure and phrase your "
+        "question to make it easier for those here to understand your problem "
+        "and help you work to a solution are:\n\n"
+        "• <https://www.mikeash.com/getting_answers.html>\n"
+        "• <https://stackoverflow.com/help/how-to-ask>\n"
     )
 
     await slack.api.query(url=methods.CHAT_POST_MESSAGE, data=response)
