@@ -128,15 +128,13 @@ async def etc_finance_bell(bot, state):
     LOG.info("Posting %s bell to #etc_finance", state)
 
     holidays = [
-        datetime.date(2018, 1, 1),
-        datetime.date(2018, 1, 15),
-        datetime.date(2018, 2, 19),
-        datetime.date(2018, 3, 30),
-        datetime.date(2018, 5, 28),
-        datetime.date(2018, 7, 4),
-        datetime.date(2018, 9, 3),
-        datetime.date(2018, 11, 22),
-        datetime.date(2018, 12, 25),
+        datetime.date(2019, 2, 18),
+        datetime.date(2019, 4, 19),
+        datetime.date(2019, 5, 27),
+        datetime.date(2019, 7, 4),
+        datetime.date(2019, 9, 2),
+        datetime.date(2019, 11, 28),
+        datetime.date(2019, 12, 25),
     ]
 
     message = Message()
