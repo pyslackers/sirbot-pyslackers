@@ -32,6 +32,9 @@ def create_endpoints(plugin):
     # this from triggering with random text we require a leading '$'
     plugin.on_message(r"s\$[A-Z\.]{1,5}", stock_quote, wait=False)
     plugin.on_message(r"c\$[A-Z\.]{1,5}", crypto_quote, wait=False)
+    plugin.on_message(
+        "^channels", channels, flags=re.IGNORECASE, mention=True, admin=True
+    )
 
 
 async def crypto_quote(message, app):
@@ -384,6 +387,37 @@ async def inspect(message, app):
             ] = f"<@{user_id}> profile information \n```{pprint.pformat(user)}```"
         else:
             response["text"] = f"Sorry I couldn't figure out which user to inspect"
+
+        await app["plugins"]["slack"].api.query(
+            url=methods.CHAT_POST_MESSAGE, data=response
+        )
+
+
+async def channels(message, app):
+    if message["channel"] == ADMIN_CHANNEL and "text" in message and message["text"]:
+        response = message.response()
+        async with app["plugins"]["pg"].connection() as pg_con:
+            data = await pg_con.fetchall(
+                """with channels as (
+  SELECT DISTINCT ON (channels.id) channels.id,
+                                   channels.raw ->> 'name' as name,
+                                   messages.time,
+                                   age(messages.time)      as age
+  FROM slack.channels
+         LEFT JOIN slack.messages ON messages.channel = slack.channels.id
+  WHERE (channels.raw ->> 'is_archived')::boolean is FALSE
+  ORDER BY channels.id, messages.time DESC
+)
+SELECT * FROM channels WHERE age > interval '31 days'
+"""
+            )
+
+        if data:
+            response["text"] = f"""```{pprint.pformat(data)}```"""
+        else:
+            response[
+                "text"
+            ] = f"""There is no channel without messages in the last 31 days"""
 
         await app["plugins"]["slack"].api.query(
             url=methods.CHAT_POST_MESSAGE, data=response
