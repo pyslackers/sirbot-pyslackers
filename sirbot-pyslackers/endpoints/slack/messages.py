@@ -397,7 +397,7 @@ async def channels(message, app):
     if message["channel"] == ADMIN_CHANNEL and "text" in message and message["text"]:
         response = message.response()
         async with app["plugins"]["pg"].connection() as pg_con:
-            data = await pg_con.fetch(
+            rows = await pg_con.fetch(
                 """with channels as (
   SELECT DISTINCT ON (channels.id) channels.id,
                                    channels.raw ->> 'name' as name,
@@ -412,8 +412,8 @@ SELECT * FROM channels WHERE age > interval '31 days'
 """
             )
 
-        if data:
-            response["text"] = f"""```{pprint.pformat(data)}```"""
+        if rows:
+            response["text"] = f"""```{pprint.pformat([dict(row) for row in rows])}```"""
         else:
             response[
                 "text"
