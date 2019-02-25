@@ -395,7 +395,6 @@ async def inspect(message, app):
 
 async def channels(message, app):
     if message["channel"] == ADMIN_CHANNEL and "text" in message and message["text"]:
-        response = message.response()
         async with app["plugins"]["pg"].connection() as pg_con:
             rows = await pg_con.fetch(
                 """with channels as (
@@ -413,11 +412,11 @@ SELECT * FROM channels WHERE age > interval '31 days'
             )
 
         if rows:
-            response["text"] = f"""```{pprint.pformat([dict(row) for row in rows])}```"""
+            text = f"""```{pprint.pformat([dict(row) for row in rows])}```"""
         else:
-            response[
-                "text"
-            ] = f"""There is no channel without messages in the last 31 days"""
+            text = f"""There is no channel without messages in the last 31 days"""
+
+        response = message.response(text=text)
 
         await app["plugins"]["slack"].api.query(
             url=methods.CHAT_POST_MESSAGE, data=response
