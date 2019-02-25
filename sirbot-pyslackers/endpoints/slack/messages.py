@@ -416,7 +416,8 @@ SELECT * FROM channels WHERE age > interval '31 days'
         else:
             text = f"""There is no channel without messages in the last 31 days"""
 
-        response = message.response(text=text)
+        response = message.response()
+        response["text"] = text
 
         await app["plugins"]["slack"].api.query(
             url=methods.CHAT_POST_MESSAGE, data=response
