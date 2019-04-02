@@ -15,6 +15,7 @@ sirbot = "*"
 pyyaml = "*"
 cython = "*"
 cchardet = "*"
+platformshconfig = "*"
 
 [dev-packages]
 "flake8" = "*"

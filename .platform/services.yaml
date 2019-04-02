@@ -1,0 +1,6 @@
+postgresql:
+  disk: 4096
+  type: "postgresql:11"
+  configuration:
+    extensions:
+      - plpgsql

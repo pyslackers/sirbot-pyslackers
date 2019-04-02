@@ -1,0 +1,46 @@
+# This file describes an application. You can have multiple applications
+# in the same project.
+#
+# See https://docs.platform.sh/user_guide/reference/platform-app-yaml.html
+
+# The name of this app. Must be unique within a project.
+name: sirbot
+
+# The runtime the application uses.
+type: "python:3.7"
+
+# The build-time dependencies of the app.
+dependencies:
+    python3:
+       pipenv: "*"
+
+# The hooks executed at various points in the lifecycle of the application.
+hooks:
+    build: |
+      curl -sS https://platform.sh/cli/installer | php
+      pipenv install --system --deploy
+
+# The size of the persistent disk of the application (in MB).
+disk: 128
+# The relationships of the application with services or other applications.
+#
+# The left-hand side is the name of the relationship as it will be exposed
+# to the application in the PLATFORM_RELATIONSHIPS variable. The right-hand
+# side is in the form `<service name>:<endpoint name>`.
+relationships:
+    database: "postgresql:postgresql"
+
+crons:
+    renewcert:
+        # Force a redeploy at 10 am (UTC) on the 1st and 15th of every month.
+        spec: '0 10 1,15 * *'
+        cmd: |
+            if [ "$PLATFORM_BRANCH" = master ]; then
+                platform redeploy --yes --no-wait
+            fi
+
+
+# The configuration of app when it is exposed to the web.
+web:
+  commands:
+    start: "python3 -m sirbot-pyslackers"

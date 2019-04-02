@@ -16,7 +16,7 @@ from sirbot.plugins.readthedocs import RTDPlugin
 from . import endpoints
 from .plugins import PypiPlugin, GiphyPlugin, DeployPlugin, StocksPlugin
 
-PORT = os.environ.get("SIRBOT_PORT", 9000)
+PORT = os.environ.get("SIRBOT_PORT", os.environ.get("PORT", 9000))
 HOST = os.environ.get("SIRBOT_ADDR", "127.0.0.1")
 VERSION = "0.0.11"
 LOG = logging.getLogger(__name__)
@@ -34,6 +34,7 @@ def make_sentry_logger():
 
 
 if __name__ == "__main__":
+
     try:
         with open(
             os.path.join(os.path.dirname(os.path.realpath(__file__)), "../logging.yml")
@@ -78,12 +79,22 @@ if __name__ == "__main__":
     bot.load_plugin(readthedocs)
 
     if "POSTGRES_DSN" in os.environ:
+        dsn = os.environ["POSTGRES_DSN"]
+    elif "PLATFORM_PROJECT" in os.environ:
+        import platformshconfig
+
+        config = platformshconfig.Config()
+        dsn = config.formatted_credentials("database", "postgresql_dsn")
+    else:
+        dsn = None
+
+    if dsn:
         postgres = PgPlugin(
             version=VERSION,
             sql_migration_directory=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)), "../sql"
             ),
-            dsn=os.environ["POSTGRES_DSN"],
+            dsn=dsn,
         )
         bot.load_plugin(postgres)
 
