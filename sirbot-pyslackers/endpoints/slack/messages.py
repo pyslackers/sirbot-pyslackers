@@ -75,7 +75,7 @@ async def crypto_quote(message, app):
                 {
                     "color": color,
                     "title": f'{quote["symbol"]} ({quote["companyName"]}): '
-                    f'${quote["latestPrice"]:,.4f}',
+                    f'${quote.get("latestPrice", 0):,.4f}',
                     "title_link": f"https://finance.yahoo.com/quote/{symbol}",
                     "fields": [
                         {
