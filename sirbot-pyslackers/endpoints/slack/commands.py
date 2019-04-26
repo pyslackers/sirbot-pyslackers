@@ -75,13 +75,11 @@ async def sponsors(command, app):
     response["unfurl_links"] = False
 
     response["text"] = (
-        "Thanks to our sponsors, <https://digitalocean.com|Digital Ocean> and "
+        "Thanks to our sponsors, <https://platform.sh|Platform.sh> and "
         "<https://sentry.io|Sentry> for providing hosting & services helping us "
         "host our <https://www.pyslackers.com|website> and Sir Bot-a-lot.\n"
-        "If you are planning on using one of those services please use our referral codes: \n"
-        "1. <https://m.do.co/c/b0c9197f680a|Digital Ocean referral code>\n"
-        "2. <https://sentry.io/?utm_source=referral&utm_content=pyslackers&utm_campaign=community|"
-        "Sentry referral code>."
+        "If you are planning on using <https://sentry.io|Sentry> please use our <https://sentry.io/?utm_source=referral&utm_content=pyslackers&utm_campaign=community|"
+        "referral code>."
     )
 
     await slack.api.query(url=methods.CHAT_POST_MESSAGE, data=response)
