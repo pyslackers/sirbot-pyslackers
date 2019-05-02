@@ -4,4 +4,4 @@ requirements:
   - Pipfile
   - Pipfile.lock
 
-branch: develop
+branch: master

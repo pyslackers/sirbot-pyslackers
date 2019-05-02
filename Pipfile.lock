@@ -267,11 +267,11 @@
         },
         "platformshconfig": {
             "hashes": [
-                "sha256:1567cf3ed6c107f9c3a230276c299b8fc1879e3f3e957eaf1aacda40bbed35cc",
-                "sha256:c94666798e9259f6cf53101f1320b6f2318e553f9beb69cb883b599b6045c87d"
+                "sha256:d285702d2c1344fa1ae333356ae717fe102c7ac7cf61edd15d294e56e004839a",
+                "sha256:effa9e10ac22cd641f0f4f618eb4c02307a43caa1b7c6dda86b3344bcd246f3d"
             ],
             "index": "pypi",
-            "version": "==2.2.1"
+            "version": "==2.2.3"
         },
         "pytz": {
             "hashes": [
@@ -322,11 +322,11 @@
         },
         "slack-sansio": {
             "hashes": [
-                "sha256:3af799bf9f51b7f80af4b6c72556ba0345ae2ccbbd74e78bca6201c3cb30a6ad",
-                "sha256:8b6cb92755811867601240b23fc07785c5b872d7ef7faa44dde8138ec1593db7"
+                "sha256:3b96fc4b16e87f9ffaa5f5b1995dbca4866b5445855980810a038e2f4f819a10",
+                "sha256:c41876ac1897f6e8a97f37b5c3be32a0d3c2e7e875c2808ee4e55d00d5bd02e8"
             ],
             "index": "pypi",
-            "version": "==0.7.0"
+            "version": "==0.7.1"
         },
         "tzlocal": {
             "hashes": [
@@ -412,11 +412,11 @@
         },
         "isort": {
             "hashes": [
-                "sha256:01cb7e1ca5e6c5b3f235f0385057f70558b70d2f00320208825fa62887292f43",
-                "sha256:268067462aed7eb2a1e237fcb287852f22077de3fb07964e87e00f829eea2d1a"
+                "sha256:1349c6f7c2a0f7539f5f2ace51a9a8e4a37086ce4de6f78f5f53fb041d0a3cd5",
+                "sha256:f09911f6eb114e5592abe635aded8bf3d2c3144ebcfcaf81ee32e7af7b7d1870"
             ],
             "index": "pypi",
-            "version": "==4.3.17"
+            "version": "==4.3.18"
         },
         "mccabe": {
             "hashes": [
