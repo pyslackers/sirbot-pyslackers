@@ -86,7 +86,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "migrate":
         postgres = configure_postgresql_plugin()
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(postgres.migrate())
+        loop.run_until_complete(postgres.startup(None))
         sys.exit(0)
 
     bot = SirBot()
