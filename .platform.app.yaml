@@ -20,6 +20,9 @@ hooks:
     curl -sS https://platform.sh/cli/installer | php
     pipenv install --system --deploy
 
+  deploy: |
+    python3 -m sirbot-pyslackers migrate
+
 # The size of the persistent disk of the application (in MB).
 disk: 128
 # The relationships of the application with services or other applications.
