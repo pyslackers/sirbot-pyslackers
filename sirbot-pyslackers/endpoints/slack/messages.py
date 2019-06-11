@@ -58,9 +58,9 @@ async def crypto_quote(message, app):
             LOG.debug("No crypto currencies found when searching for: %s", symbol)
         else:
             color = "gray"
-            if quote.change > 0:
+            if quote.change_24hr_percent > 0:
                 color = "good"
-            elif quote.change < 0:
+            elif quote.change_24hr_percent < 0:
                 color = "danger"
 
             response.update(
