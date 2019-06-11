@@ -68,7 +68,7 @@ class StocksPlugin:
 
     async def crypto(self, symbol: str) -> CryptoQuote:
         """https://docs.coincap.io"""
-        async with self.session.get("https://api.coincap.io/v2/rates/") as r:
+        async with self.session.get("https://api.coincap.io/v2/assets") as r:
             r.raise_for_status()
             top_assets = await r.json()
 
