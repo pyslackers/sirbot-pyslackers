@@ -38,6 +38,7 @@ def create_endpoints(plugin):
 
 
 async def crypto_quote(message, app):
+    stocks = app["plugins"]["stocks"]
     match = STOCK_REGEX.search(message.get("text", ""))
     if not match:
         return
@@ -47,78 +48,43 @@ async def crypto_quote(message, app):
 
     response = message.response()
     try:
-        stocks = app["plugins"]["stocks"]
-        crypto = await stocks.crypto()
-        quote = None
-        for c in crypto:
-            if c["symbol"] == f"{symbol}USDT":
-                quote = c
-                break
-        if quote is None:
-            response["text"] = f"The crypto symbol `{symbol}` could not be found"
-            LOG.debug("No crypto currencies found when searching for: %s", symbol)
+        quote = await stocks.crypto(symbol)
         LOG.debug("Crypto quote from IEX API: %s", quote)
     except ClientResponseError as e:
         LOG.error("Error retrieving crypto quotes: %s", e)
-    if quote is not None:
-        # Sometimes the API returns None records. We remove them here.
-        quote = {k: v for k, v in quote.items() if v is not None}
-        change = quote.get("change", 0)
-        color = "gray"
-        if change > 0:
-            color = "good"
-        elif change < 0:
-            color = "danger"
+    else:
+        if quote is None:
+            response["text"] = f"The crypto symbol `{symbol}` could not be found"
+            LOG.debug("No crypto currencies found when searching for: %s", symbol)
+        else:
+            color = "gray"
+            if quote.change > 0:
+                color = "good"
+            elif quote.change < 0:
+                color = "danger"
 
-        response.update(
-            attachments=[
-                {
-                    "color": color,
-                    "title": f'{quote["symbol"]} ({quote["companyName"]}): '
-                    f'${quote.get("latestPrice", 0):,.4f}',
-                    "title_link": f"https://finance.yahoo.com/quote/{symbol}",
-                    "fields": [
-                        {
-                            "title": "Change",
-                            "value": f'${quote.get("change", 0):,.4f} ({quote.get("changePercent", 0) * 100:,.4f}%)',
-                            "short": True,
-                        },
-                        {
-                            "title": "Volume",
-                            "value": f'{quote.get("latestVolume", 0):,}',
-                            "short": True,
-                        },
-                        {
-                            "title": "Low",
-                            "value": f'${quote.get("low", 0):,.4f}',
-                            "short": True,
-                        },
-                        {
-                            "title": "High",
-                            "value": f'${quote.get("high", 0):,.4f}',
-                            "short": True,
-                        },
-                        {
-                            "title": "Latest time of quote",
-                            "value": f'{quote.get("latestTime", "N/A")} EST',
-                            "short": True,
-                        },
-                    ],
-                    "footer": f"Data provided for free by "
-                    f"<https://iextrading.com/developer|IEX>. View "
-                    f"<https://iextrading.com/api-exhibit-a/|"
-                    f"IEX's Terms of Use>.",
-                    "footer_icon": "https://iextrading.com/apple-touch-icon.png",  # noqa
-                    "ts": quote.get("latestUpdate", 0) / 1000,
-                }
-            ]
-        )
+            response.update(
+                attachments=[
+                    {
+                        "color": color,
+                        "title": f"{quote.symbol} ({quote.name}): ${quote.price:,.4f}",
+                        "title_link": quote.link,
+                        "fields": [
+                            {
+                                "title": "Change (24hr)",
+                                "value": f"{quote.change_24hr_percent:,.4f}%",
+                            }
+                        ],
+                    }
+                ]
+            )
     await app["plugins"]["slack"].api.query(
         url=methods.CHAT_POST_MESSAGE, data=response
     )
 
 
 async def stock_quote(message, app):
+    stocks = app["plugins"]["stocks"]
     match = STOCK_REGEX.search(message.get("text", ""))
     if not match:
         return
@@ -128,75 +94,64 @@ async def stock_quote(message, app):
 
     response = message.response()
     try:
-        stocks = app["plugins"]["stocks"]
-        quote = (await stocks.book(symbol))["quote"]
-        logo = (await stocks.logo(symbol))["url"]
-        LOG.debug("Quote from IEX API: %s", quote)
+        quote = await stocks.price(symbol)
+        LOG.debug("Quote from API: %s", quote)
     except ClientResponseError as e:
-        if e.status == 404:
-            response["text"] = f"The symbol `{symbol}` could not be found."
-        else:
-            LOG.error("Error retrieving stock quotes: %s", e)
-            response["text"] = "Unable to retrieve quotes right now."
+        LOG.error("Error retrieving stock quotes: %s", e)
+        response["text"] = "Unable to retrieve quotes right now."
     else:
-        # Sometimes the API returns None records. We remove them here.
-        quote = {k: v for k, v in quote.items() if v is not None}
-        change = quote.get("change", 0)
-        color = "gray"
-        if change > 0:
-            color = "good"
-        elif change < 0:
-            color = "danger"
+        if quote is None:
+            response["text"] = f"Unable to find ticker '{symbol}'"
+        else:
+            color = "gray"
+            if quote.change > 0:
+                color = "good"
+            elif quote.change < 0:
+                color = "danger"
 
-        response.update(
-            attachments=[
-                {
-                    "color": color,
-                    "thumb_url": logo,
-                    "title": f'{quote["symbol"]} ({quote["companyName"]}): '
-                    f'${quote["latestPrice"]:,.4f}',
-                    "title_link": f"https://finance.yahoo.com/quote/{symbol}",
-                    "fields": [
-                        {
-                            "title": "Change",
-                            "value": f'${quote.get("change", 0):,.4f} ({quote.get("changePercent", 0) * 100:,.4f}%)',
-                            "short": True,
-                        },
-                        {
-                            "title": "Volume",
-                            "value": f'{quote.get("latestVolume", 0):,}',
-                            "short": True,
-                        },
-                        {
-                            "title": "Open",
-                            "value": f'${quote.get("open", 0):,.4f}',
-                            "short": True,
-                        },
-                        {
-                            "title": "Close",
-                            "value": f'${quote.get("close", 0):,.4f}',
-                            "short": True,
-                        },
-                        {
-                            "title": "Low",
-                            "value": f'${quote.get("low", 0):,.4f}',
-                            "short": True,
-                        },
-                        {
-                            "title": "High",
-                            "value": f'${quote.get("high", 0):,.4f}',
-                            "short": True,
-                        },
-                    ],
-                    "footer": f"Data provided for free by "
-                    f"<https://iextrading.com/developer|IEX>. View "
-                    f"<https://iextrading.com/api-exhibit-a/|"
-                    f"IEX's Terms of Use>.",
-                    "footer_icon": "https://iextrading.com/apple-touch-icon.png",  # noqa
-                    "ts": quote.get("latestUpdate", 0) / 1000,
-                }
-            ]
-        )
+            response.update(
+                attachments=[
+                    {
+                        "color": color,
+                        "title": f"{quote.symbol} ({quote.company}): ${quote.price:,.4f}",
+                        "title_link": f"https://finance.yahoo.com/quote/{quote.symbol}",
+                        "fields": [
+                            {
+                                "title": "Change",
+                                "value": f"${quote.change:,.4f} ({quote.change_percent:,.4f}%)",
+                                "short": True,
+                            },
+                            {
+                                "title": "Volume",
+                                "value": f"{quote.volume:,}",
+                                "short": True,
+                            },
+                            {
+                                "title": "Open",
+                                "value": f"${quote.market_open:,.4f}",
+                                "short": True,
+                            },
+                            {
+                                "title": "Close",
+                                "value": f"${quote.market_close:,.4f}",
+                                "short": True,
+                            },
+                            {
+                                "title": "Low",
+                                "value": f"${quote.low:,.4f}",
+                                "short": True,
+                            },
+                            {
+                                "title": "High",
+                                "value": f"${quote.high:,.4f}",
+                                "short": True,
+                            },
+                        ],
+                        "ts": int(quote.time.timestamp()),
+                    }
+                ]
+            )
+
     await app["plugins"]["slack"].api.query(
         url=methods.CHAT_POST_MESSAGE, data=response
     )
