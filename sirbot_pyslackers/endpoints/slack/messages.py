@@ -13,7 +13,7 @@ from asyncpg.exceptions import UniqueViolationError
 from .utils import ADMIN_CHANNEL, HELP_FIELD_DESCRIPTIONS
 
 LOG = logging.getLogger(__name__)
-STOCK_REGEX = re.compile(r"\$\b(?P<symbol>\^?[A-Z.]{1,5})\b")
+STOCK_REGEX = re.compile(r"\b(?P<asset_class>[cs])\$(?P<symbol>\^?[A-Z.]{1,5})\b")
 TELL_REGEX = re.compile("tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)")
 
 
@@ -30,56 +30,9 @@ def create_endpoints(plugin):
     plugin.on_message("^help", help_message, flags=re.IGNORECASE, mention=True)
     # stock tickers are 1-5 capital characters, with a dot allowed. To keep
     # this from triggering with random text we require a leading '$'
-    plugin.on_message(r"s\$[A-Z\.]{1,5}", stock_quote, wait=False)
-    plugin.on_message(r"c\$[A-Z\.]{1,5}", crypto_quote, wait=False)
+    plugin.on_message(STOCK_REGEX.pattern, stock_quote, wait=False)
     plugin.on_message(
         "^channels", channels, flags=re.IGNORECASE, mention=True, admin=True
-    )
-
-
-async def crypto_quote(message, app):
-    stocks = app["plugins"]["stocks"]
-    match = STOCK_REGEX.search(message.get("text", ""))
-    if not match:
-        return
-
-    symbol = match.group("symbol")
-    LOG.debug("Fetching crypto quotes for symbol %s", symbol)
-
-    response = message.response()
-    try:
-        quote = await stocks.crypto(symbol)
-        LOG.debug("Crypto quote from IEX API: %s", quote)
-    except ClientResponseError as e:
-        LOG.error("Error retrieving crypto quotes: %s", e)
-    else:
-        if quote is None:
-            response["text"] = f"The crypto symbol `{symbol}` could not be found"
-            LOG.debug("No crypto currencies found when searching for: %s", symbol)
-        else:
-            color = "gray"
-            if quote.change_24hr_percent > 0:
-                color = "good"
-            elif quote.change_24hr_percent < 0:
-                color = "danger"
-
-            response.update(
-                attachments=[
-                    {
-                        "color": color,
-                        "title": f"{quote.symbol} ({quote.name}): ${quote.price:,.4f}",
-                        "title_link": quote.link,
-                        "fields": [
-                            {
-                                "title": "Change (24hr)",
-                                "value": f"{quote.change_24hr_percent:,.4f}%",
-                            }
-                        ],
-                    }
-                ]
-            )
-    await app["plugins"]["slack"].api.query(
-        url=methods.CHAT_POST_MESSAGE, data=response
     )
 
 
@@ -89,8 +42,12 @@ async def stock_quote(message, app):
     if not match:
         return
 
-    symbol = match.group("symbol")
-    LOG.debug("Fetching stock quotes for symbol %s", symbol)
+    asset_class, symbol = match.group("asset_class"), match.group("symbol")
+    LOG.debug("Fetching stock quotes for symbol %s in asset class %s", symbol, asset_class)
+
+    if asset_class == "c":
+        LOG.debug("Fetching a crypto quote, appending USD as the pair's quote price.")
+        symbol += "-USD"
 
     response = message.response()
     try:

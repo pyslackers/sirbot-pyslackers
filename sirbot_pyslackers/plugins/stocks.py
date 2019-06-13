@@ -2,6 +2,7 @@ import os
 import decimal
 import datetime
 import dataclasses
+from typing import Optional
 
 
 @dataclasses.dataclass(frozen=True)
@@ -17,15 +18,7 @@ class StockQuote:
     low: decimal.Decimal
     volume: decimal.Decimal
     time: datetime.datetime
-
-
-@dataclasses.dataclass(frozen=True)
-class CryptoQuote:
-    symbol: str
-    name: str
-    price: decimal.Decimal
-    link: str
-    change_24hr_percent: decimal.Decimal
+    logo: Optional[str] = None
 
 
 class StocksPlugin:
@@ -64,21 +57,5 @@ class StocksPlugin:
                 low=decimal.Decimal.from_float(quote["regularMarketDayLow"]),
                 volume=decimal.Decimal.from_float(quote["regularMarketVolume"]),
                 time=datetime.datetime.fromtimestamp(quote["regularMarketTime"]),
+                logo=quote.get("coinImageUrl"),
             )
-
-    async def crypto(self, symbol: str) -> CryptoQuote:
-        """https://docs.coincap.io"""
-        async with self.session.get("https://api.coincap.io/v2/assets") as r:
-            r.raise_for_status()
-            top_assets = await r.json()
-
-        symbol = symbol.lower()
-        for asset in top_assets["data"]:
-            if asset["symbol"].lower() == symbol:
-                return CryptoQuote(
-                    symbol=asset["symbol"],
-                    name=asset["name"] or "",
-                    price=decimal.Decimal(asset["priceUsd"]),
-                    link="https://coincap.io/assets/" + asset["id"],
-                    change_24hr_percent=decimal.Decimal(asset["changePercent24Hr"]),
-                )

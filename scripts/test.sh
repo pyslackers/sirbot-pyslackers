@@ -13,4 +13,7 @@ echo "TEST: flake8"
 flake8 . || EXIT=$?
 export PYTHONWARNINGS="default"
 
+echo "TEST: pytest"
+python -m pytest ./tests/ || EXIT=$?
+
 exit $EXIT
