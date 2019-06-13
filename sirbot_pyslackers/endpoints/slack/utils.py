@@ -49,7 +49,11 @@ HELP_FIELD_DESCRIPTIONS = [
         "value": "Retrieve today's prices for the provided stock ticker.",
     },
     {
+        "title": "s$^INDEX",
+        "value": "Retrieve today's prices for the provided stock market index (as supported by Yahoo!).",
+    },
+    {
         "title": "c$CRYPTO_SYMBOL",
-        "value": "Retrieve today's value for the provided cryptocurrency",
+        "value": "Retrieve today's value for the provided cryptocurrency.",
     },
 ]
