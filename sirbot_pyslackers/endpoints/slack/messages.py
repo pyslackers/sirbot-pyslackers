@@ -56,8 +56,11 @@ async def stock_quote(message, app):
         quote = await stocks.price(symbol)
         LOG.debug("Quote from API: %s", quote)
     except ClientResponseError as e:
-        LOG.error("Error retrieving stock quotes: %s", e)
-        response["text"] = "Unable to retrieve quotes right now."
+        if e.status == 404:
+            response["text"] = f"Unable to find ticker {symbol}"
+        else:
+            LOG.error("Error retrieving stock quotes: %s", e)
+            response["text"] = "Unable to retrieve quotes right now."
     else:
         if quote is None:
             response["text"] = f"Unable to find ticker '{symbol}'"
