@@ -43,7 +43,7 @@ class StocksPlugin:
             quote = body[0]
             return StockQuote(
                 symbol=quote["symbol"],
-                company=quote["longName"],
+                company=quote.get("longName", quote.get("shortName", "")),
                 price=decimal.Decimal.from_float(quote["regularMarketPrice"]),
                 change=decimal.Decimal.from_float(quote["regularMarketChange"]),
                 change_percent=decimal.Decimal.from_float(
