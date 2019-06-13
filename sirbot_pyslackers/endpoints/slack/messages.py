@@ -104,6 +104,7 @@ async def stock_quote(message, app):
                                 "short": True,
                             },
                         ],
+                        "footer_icon": quote.logo,
                         "ts": int(quote.time.timestamp()),
                     }
                 ]
