@@ -59,7 +59,7 @@ async def stock_quote(message, app):
         if e.status == 404:
             response["text"] = f"Unable to find ticker {symbol}"
         else:
-            LOG.error("Error retrieving stock quotes: %s", e)
+            LOG.exception("Error retrieving stock quotes.")
             response["text"] = "Unable to retrieve quotes right now."
     else:
         if quote is None:
