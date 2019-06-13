@@ -53,4 +53,4 @@ crons:
 # The configuration of app when it is exposed to the web.
 web:
   commands:
-    start: "python3 -m sirbot-pyslackers"
+    start: "python3 -m sirbot_pyslackers"
