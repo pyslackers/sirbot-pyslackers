@@ -43,7 +43,9 @@ async def stock_quote(message, app):
         return
 
     asset_class, symbol = match.group("asset_class"), match.group("symbol")
-    LOG.debug("Fetching stock quotes for symbol %s in asset class %s", symbol, asset_class)
+    LOG.debug(
+        "Fetching stock quotes for symbol %s in asset class %s", symbol, asset_class
+    )
 
     if asset_class == "c":
         LOG.debug("Fetching a crypto quote, appending USD as the pair's quote price.")
