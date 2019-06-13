@@ -13,7 +13,7 @@ from asyncpg.exceptions import UniqueViolationError
 from .utils import ADMIN_CHANNEL, HELP_FIELD_DESCRIPTIONS
 
 LOG = logging.getLogger(__name__)
-STOCK_REGEX = re.compile(r"\$\b(?P<symbol>[A-Z.]{1,5})\b")
+STOCK_REGEX = re.compile(r"\$\b(?P<symbol>\^?[A-Z.]{1,5})\b")
 TELL_REGEX = re.compile("tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)")
 
 

@@ -19,4 +19,4 @@ COPY Pipfil* /sirbot/
 RUN pipenv install --system --deploy --dev
 
 COPY . /sirbot
-ENTRYPOINT [ "python3", "-m", "sirbot-pyslackers" ]
+ENTRYPOINT [ "python3", "-m", "sirbot_pyslackers" ]
