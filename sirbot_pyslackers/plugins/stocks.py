@@ -1,8 +1,8 @@
 import os
 import datetime
 import dataclasses
-from decimal import Decimal
 from typing import Optional
+from decimal import Decimal
 
 
 @dataclasses.dataclass(frozen=True)
