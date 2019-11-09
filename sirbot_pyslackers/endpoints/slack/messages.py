@@ -34,6 +34,7 @@ def create_endpoints(plugin):
     plugin.on_message(
         "^channels", channels, flags=re.IGNORECASE, mention=True, admin=True
     )
+    plugin.on_message("^cleanup", cleanup, flags=re.IGNORECASE, mention=True)
 
 
 async def stock_quote(message, app):
@@ -279,36 +280,42 @@ async def github_repo_link(message, app):
 
 
 async def inspect(message, app):
-    if message["channel"] == ADMIN_CHANNEL and "text" in message and message["text"]:
-        response = message.response()
-        match = re.search("<@(.*)>", message["text"])
+    if (
+        message["channel"] != ADMIN_CHANNEL
+        or "text" not in message
+        or not message["text"]
+    ):
+        return
 
-        if match:
-            user_id = match.group(1)
+    response = message.response()
+    match = re.search("<@(.*)>", message["text"])
 
-            async with app["plugins"]["pg"].connection() as pg_con:
-                data = await pg_con.fetchrow(
-                    """SELECT raw, join_date FROM slack.users WHERE id = $1""", user_id
-                )
+    if match:
+        user_id = match.group(1)
 
-            if data:
-                user = data["raw"]
-                user["join_date"] = data["join_date"].isoformat()
-            else:
-                data = await app["plugins"]["slack"].api.query(
-                    url=methods.USERS_INFO, data={"user": user_id}
-                )
-                user = data["user"]
+        async with app["plugins"]["pg"].connection() as pg_con:
+            data = await pg_con.fetchrow(
+                """SELECT raw, join_date FROM slack.users WHERE id = $1""", user_id
+            )
 
-            response[
-                "text"
-            ] = f"<@{user_id}> profile information \n```{pprint.pformat(user)}```"
+        if data:
+            user = data["raw"]
+            user["join_date"] = data["join_date"].isoformat()
         else:
-            response["text"] = f"Sorry I couldn't figure out which user to inspect"
+            data = await app["plugins"]["slack"].api.query(
+                url=methods.USERS_INFO, data={"user": user_id}
+            )
+            user = data["user"]
 
-        await app["plugins"]["slack"].api.query(
-            url=methods.CHAT_POST_MESSAGE, data=response
-        )
+        response[
+            "text"
+        ] = f"<@{user_id}> profile information \n```{pprint.pformat(user)}```"
+    else:
+        response["text"] = f"Sorry I couldn't figure out which user to inspect"
+
+    await app["plugins"]["slack"].api.query(
+        url=methods.CHAT_POST_MESSAGE, data=response
+    )
 
 
 async def channels(message, app):
@@ -336,6 +343,55 @@ SELECT * FROM channels WHERE age > interval '31 days'
 
         response = message.response()
         response["text"] = text
+
+        await app["plugins"]["slack"].api.query(
+            url=methods.CHAT_POST_MESSAGE, data=response
+        )
+
+
+async def cleanup(message, app):
+
+    if (
+        message["channel"] != ADMIN_CHANNEL
+        or "text" not in message
+        or not message["text"]
+    ):
+        return
+
+    response = message.response()
+    match = re.search("<@(.*)>", message["text"])
+
+    if match:
+        user_id = match.group(1)
+
+        async with app["plugins"]["pg"].connection() as pg_con:
+            messages = await pg_con.fetchrow(
+                """SELECT count(id) FROM slack.messages WHERE "user" = $1""", user_id
+            )
+
+        response["channel"] = ADMIN_CHANNEL
+        response["attachments"] = [
+            {
+                "fallback": "User cleanup",
+                "title": f'Confirm cleanup of <@{user_id}> {messages["count"]} messages.',
+                "callback_id": "user_cleanup",
+                "actions": [
+                    {
+                        "name": "cancel",
+                        "text": "Cancel",
+                        "style": "primary",
+                        "type": "button",
+                    },
+                    {
+                        "name": "confirm",
+                        "text": "Burn baby burn !",
+                        "style": "danger",
+                        "type": "button",
+                        "value": user_id,
+                    },
+                ],
+            }
+        ]
 
         await app["plugins"]["slack"].api.query(
             url=methods.CHAT_POST_MESSAGE, data=response

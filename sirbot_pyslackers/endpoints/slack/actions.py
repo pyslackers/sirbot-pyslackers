@@ -34,6 +34,9 @@ def create_endpoints(plugin):
     plugin.on_action("save_conversation", save_conversation)
     plugin.on_action("make_snippet", make_snippet)
 
+    plugin.on_action("user_cleanup", user_cleanup_cancel, name="cancel")
+    plugin.on_action("user_cleanup", user_cleanup_confirm, name="confirm")
+
 
 async def gif_search_ok(action, app):
     response = Message()
@@ -445,3 +448,62 @@ async def make_snippet(action, app):
         response = Message()
         response["text"] = "Sorry I'm unable to format that message"
         await app.plugins["slack"].api.query(url=action["response_url"], data=response)
+
+
+async def user_cleanup_cancel(action, app):
+    response = Message()
+    response["channel"] = action["channel"]["id"]
+    response["ts"] = action["message_ts"]
+    response["attachments"] = action["original_message"]["attachments"]
+    response["attachments"][0]["color"] = "good"
+    response["attachments"][0]["text"] = f'Cancelled by <@{action["user"]["id"]}>'
+    del response["attachments"][0]["actions"]
+
+    await app.plugins["slack"].api.query(url=action["response_url"], data=response)
+
+
+async def user_cleanup_confirm(action, app):
+    response = Message()
+    response["channel"] = action["channel"]["id"]
+    response["ts"] = action["message_ts"]
+    response["attachments"] = action["original_message"]["attachments"]
+    response["attachments"][0]["color"] = "good"
+    response["attachments"][0][
+        "text"
+    ] = f'Cleanup confirmed by <@{action["user"]["id"]}>'
+    del response["attachments"][0]["actions"]
+
+    await app.plugins["slack"].api.query(url=action["response_url"], data=response)
+
+    user_id = action["actions"][0]["value"]
+    asyncio.create_task(_cleanup_user(app, user_id))
+
+
+async def _cleanup_user(app, user):
+    try:
+        async with app["plugins"]["pg"].connection() as pg_con:
+            messages = await pg_con.fetch(
+                """SELECT id, channel FROM slack.messages WHERE "user" = $1""", user
+            )
+
+        for message in messages:
+            try:
+                data = {"channel": message["channel"], "ts": message["id"]}
+                await app.plugins["slack"].api.query(url=methods.CHAT_DELETE, data=data)
+            except SlackAPIError as e:
+                if e.error == "message_not_found":
+                    continue
+                else:
+                    LOG.exception(
+                        "Failed to cleanup message %s in channel %s",
+                        message["id"],
+                        message["channel"],
+                    )
+            except Exception:
+                LOG.exception(
+                    "Failed to cleanup message %s in channel %s",
+                    message["id"],
+                    message["channel"],
+                )
+    except Exception:
+        LOG.exception("Unexpected exception cleaning up user %s", user)
