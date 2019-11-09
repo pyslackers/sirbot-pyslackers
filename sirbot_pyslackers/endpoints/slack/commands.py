@@ -241,9 +241,13 @@ async def snippet(command, app):
     response["unfurl_links"] = False
 
     response["text"] = (
-        "Please use the snippet feature, or backticks, when sharing code. You can do so by "
-        "clicking on the :heavy_plus_sign: on the left of the input box for a snippet.\n"
-        "For more information on snippets click "
+        "Please use the snippet feature, or backticks, when sharing code. \n"
+        "To include a snippet, click the :paperclip: on the left and hover over "
+        "`Create new...` then select `Code or text snippet`.\n"
+        "By wrapping the text/code with backtics (`) you get `something like this`,"
+        "and by wrapping a multiple line block with (```) you can get:\n"
+        "```\nA multiline codeblock\nwhich is great for short snippets!```"
+        "For more information on snippets, click "
         "<https://get.slack.help/hc/en-us/articles/204145658-Create-a-snippet|here>.\n"
         "For more information on inline code formatting with backticks click "
         "<https://get.slack.help/hc/en-us/articles/202288908-Format-your-messages#inline-code|here>."

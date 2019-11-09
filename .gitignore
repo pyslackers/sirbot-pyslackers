@@ -1,3 +1,5 @@
 .env
+.env/
+.idea/
 __pycache__
 docker/sirbot.env
