@@ -1,3 +1,4 @@
+import os
 import json
 import asyncio
 import logging
@@ -6,6 +7,7 @@ import datetime
 from slack import methods
 from aiohttp.web import json_response
 from slack.events import Message
+from slack.io.aiohttp import SlackAPI
 from slack.exceptions import SlackAPIError
 
 from .utils import ADMIN_CHANNEL
@@ -486,10 +488,13 @@ async def _cleanup_user(app, user):
                 """SELECT id, channel FROM slack.messages WHERE "user" = $1""", user
             )
 
+        api = SlackAPI(
+            session=app["http_session"], token=os.environ["SLACK_ADMIN_TOKEN"]
+        )
         for message in messages:
             try:
                 data = {"channel": message["channel"], "ts": message["id"]}
-                await app.plugins["slack"].api.query(url=methods.CHAT_DELETE, data=data)
+                await api.query(url=methods.CHAT_DELETE, data=data)
             except SlackAPIError as e:
                 if e.error == "message_not_found":
                     continue
