@@ -21,7 +21,7 @@ hooks:
     pipenv install --system --deploy
 
   deploy: |
-    python3 -m sirbot-pyslackers migrate
+    python3 -m sirbot_pyslackers migrate
 
 # The size of the persistent disk of the application (in MB).
 disk: 128
