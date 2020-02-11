@@ -13,13 +13,11 @@ def create_endpoints(plugin):
     plugin.on_command("/admin", tell_admin)
     plugin.on_command("/sirbot", sirbot_help)
     plugin.on_command("/howtoask", ask)
-    plugin.on_command("/gif", gif_search)
     plugin.on_command("/justask", just_ask)
     plugin.on_command("/pypi", pypi_search)
     plugin.on_command("/sponsors", sponsors)
     plugin.on_command("/snippet", snippet)
     plugin.on_command("/report", report)
-    plugin.on_command("/save", save_conversation)
 
 
 async def just_ask(command, app):
@@ -119,70 +117,6 @@ async def report(command, app):
     await app.plugins["slack"].api.query(url=methods.DIALOG_OPEN, data=data)
 
 
-async def gif_search(command, app):
-    response = Message()
-    response["channel"] = command["channel_id"]
-
-    if command["text"]:
-        response["user"] = command["user_id"]
-        urls = await app.plugins["giphy"].search(command["text"])
-
-        if urls:
-            urls = [url.split("?")[0] for url in urls]
-            data = json.dumps({"urls": urls, "search": command["text"], "index": 0})
-
-            response["attachments"] = [
-                {
-                    "title": f'You searched for `{command["text"]}`',
-                    "fallback": f'You searched for `{command["text"]}`',
-                    "image_url": urls[0],
-                    "callback_id": "gif_search",
-                    "actions": [
-                        {
-                            "name": "ok",
-                            "text": "Send",
-                            "style": "primary",
-                            "value": data,
-                            "type": "button",
-                        },
-                        {
-                            "name": "next",
-                            "text": "Next",
-                            "value": data,
-                            "type": "button",
-                        },
-                        {
-                            "name": "cancel",
-                            "text": "Cancel",
-                            "style": "danger",
-                            "value": data,
-                            "type": "button",
-                        },
-                    ],
-                }
-            ]
-        else:
-            response["text"] = f'No result found on giphy for: `{command["text"]}`'
-        await app.plugins["slack"].api.query(
-            url=methods.CHAT_POST_EPHEMERAL, data=response
-        )
-
-    else:
-        url = await app.plugins["giphy"].trending()
-
-        response["attachments"] = [
-            {
-                "title": "Trending gif on Giphy",
-                "fallback": "Trending gif on Giphy",
-                "image_url": url,
-            }
-        ]
-
-        await app.plugins["slack"].api.query(
-            url=methods.CHAT_POST_MESSAGE, data=response
-        )
-
-
 async def pypi_search(command, app):
     response = Message()
     response["channel"] = command["channel_id"]
@@ -280,69 +214,6 @@ async def tell_admin(command, app):
                     "type": "textarea",
                     "value": command["text"],
                 }
-            ],
-        },
-    }
-
-    await app.plugins["slack"].api.query(url=methods.DIALOG_OPEN, data=data)
-
-
-async def save_conversation(command, app):
-
-    data = {
-        "trigger_id": command["trigger_id"],
-        "dialog": {
-            "callback_id": "save_conversation",
-            "title": "Save conversation",
-            "elements": [
-                {
-                    "label": "Title",
-                    "name": "title",
-                    "type": "text",
-                    "value": command["text"],
-                },
-                {
-                    "label": "Channel",
-                    "name": "channel",
-                    "type": "select",
-                    "value": command["channel_id"],
-                    "data_source": "channels",
-                },
-                {
-                    "label": "Start",
-                    "name": "start",
-                    "type": "select",
-                    "options": [
-                        {"label": "2 minutes ago", "value": 2 * 60},
-                        {"label": "5 minutes ago", "value": 5 * 60},
-                        {"label": "10 minutes ago", "value": 10 * 60},
-                        {"label": "15 minutes ago", "value": 15 * 60},
-                        {"label": "20 minutes ago", "value": 20 * 60},
-                        {"label": "25 minutes ago", "value": 25 * 60},
-                        {"label": "30 minutes ago", "value": 30 * 60},
-                    ],
-                },
-                {
-                    "label": "End",
-                    "name": "end",
-                    "type": "select",
-                    "options": [
-                        {"label": "now", "value": 0},
-                        {"label": "2 minutes ago", "value": 2 * 60},
-                        {"label": "5 minutes ago", "value": 5 * 60},
-                        {"label": "10 minutes ago", "value": 10 * 60},
-                        {"label": "15 minutes ago", "value": 15 * 60},
-                        {"label": "20 minutes ago", "value": 20 * 60},
-                        {"label": "25 minutes ago", "value": 25 * 60},
-                    ],
-                },
-                {
-                    "label": "Comment",
-                    "name": "comment",
-                    "type": "textarea",
-                    "value": command["text"],
-                    "optional": True,
-                },
             ],
         },
     }

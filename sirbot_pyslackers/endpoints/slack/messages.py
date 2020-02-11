@@ -23,7 +23,6 @@ def create_endpoints(plugin):
     plugin.on_message(".*", mention, flags=re.IGNORECASE, mention=True)
     plugin.on_message(".*", save_in_database, wait=False)
     plugin.on_message(".*", channel_topic, subtype="channel_topic")
-    plugin.on_message("g#", github_repo_link)
     plugin.on_message(
         "^inspect", inspect, flags=re.IGNORECASE, mention=True, admin=True
     )
@@ -252,31 +251,6 @@ async def channel_topic(message, app):
         await app["plugins"]["slack"].api.query(
             url=methods.CHAT_POST_MESSAGE, data=response
         )
-
-
-async def github_repo_link(message, app):
-    if "text" in message and message["text"]:
-        response = message.response()
-
-        for i in range(0, message["text"].count("g#")):
-            start = message["text"].find("g#") + 2
-            repo = message["text"][start:].split()[0]
-
-            # Remove occurrence so we don't use it again
-            len_to_remove = (start + len(repo)) + 2
-            message["text"] = message["text"][len_to_remove:]
-
-            if "/" not in repo:
-                repo = "pyslackers/" + repo
-
-            url = f"https://github.com/{repo}"
-            r = await app["http_session"].request("GET", url)
-
-            if r.status == 200:
-                response["text"] = url
-                await app["plugins"]["slack"].api.query(
-                    url=methods.CHAT_POST_MESSAGE, data=response
-                )
 
 
 async def inspect(message, app):
