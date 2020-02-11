@@ -236,6 +236,8 @@ async def pypi_search(command, app):
 
 
 async def snippet(command, app):
+    """Post a message to the current channel about using snippets and backticks to visually 
+    format code."""
     response = Message()
     response["channel"] = command["channel_id"]
     response["unfurl_links"] = False
@@ -244,15 +246,24 @@ async def snippet(command, app):
         "Please use the snippet feature, or backticks, when sharing code. \n"
         "To include a snippet, click the :paperclip: on the left and hover over "
         "`Create new...` then select `Code or text snippet`.\n"
-        "By wrapping the text/code with backtics (`) you get `something like this`,"
-        "and by wrapping a multiple line block with (```) you can get:\n"
-        "```\nA multiline codeblock\nwhich is great for short snippets!```"
+        "By wrapping the text/code with backticks (`) you get:\n"
+        "`text formatted like this`\n"
+        "By wrapping a multiple line block with three backticks (```) you can get:\n"
+    )
+    
+    await app.plugins["slack"].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+    
+    response["text"] = (
+        "```\n"
+        "A multiline codeblock\nwhich is great for short snippets!\n"
+        "```\n"
         "For more information on snippets, click "
         "<https://get.slack.help/hc/en-us/articles/204145658-Create-a-snippet|here>.\n"
         "For more information on inline code formatting with backticks click "
         "<https://get.slack.help/hc/en-us/articles/202288908-Format-your-messages#inline-code|here>."
+   
     )
-
+    
     await app.plugins["slack"].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
 
 
