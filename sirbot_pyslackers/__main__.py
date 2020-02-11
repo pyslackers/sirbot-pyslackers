@@ -15,7 +15,7 @@ from sirbot.plugins.apscheduler import APSchedulerPlugin
 from sirbot.plugins.readthedocs import RTDPlugin
 
 from . import endpoints
-from .plugins import PypiPlugin, GiphyPlugin, StocksPlugin
+from .plugins import PypiPlugin, StocksPlugin
 
 PORT = os.environ.get("SIRBOT_PORT", os.environ.get("PORT", 9000))
 HOST = os.environ.get("SIRBOT_ADDR", "127.0.0.1")
@@ -96,9 +96,6 @@ if __name__ == "__main__":
 
     pypi = PypiPlugin()
     bot.load_plugin(pypi)
-
-    giphy = GiphyPlugin()
-    bot.load_plugin(giphy)
 
     stocks = StocksPlugin()
     bot.load_plugin(stocks)
