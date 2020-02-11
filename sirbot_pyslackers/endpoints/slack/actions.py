@@ -7,8 +7,8 @@ import datetime
 from slack import methods
 from aiohttp.web import json_response
 from slack.events import Message
-from slack.io.aiohttp import SlackAPI
 from slack.exceptions import SlackAPIError
+from slack.io.aiohttp import SlackAPI
 
 from .utils import ADMIN_CHANNEL
 
