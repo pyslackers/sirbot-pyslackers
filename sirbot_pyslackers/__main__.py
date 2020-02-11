@@ -9,7 +9,6 @@ import platformshconfig
 from sirbot import SirBot
 from raven.processors import SanitizePasswordsProcessor
 from sirbot.plugins.slack import SlackPlugin
-from sirbot.plugins.github import GithubPlugin
 from raven.handlers.logging import SentryHandler
 from sirbot.plugins.postgres import PgPlugin
 from sirbot.plugins.apscheduler import APSchedulerPlugin
@@ -94,10 +93,6 @@ if __name__ == "__main__":
     slack = SlackPlugin()
     endpoints.slack.create_endpoints(slack)
     bot.load_plugin(slack)
-
-    github = GithubPlugin()
-    endpoints.github.create_endpoints(github)
-    bot.load_plugin(github)
 
     pypi = PypiPlugin()
     bot.load_plugin(pypi)
