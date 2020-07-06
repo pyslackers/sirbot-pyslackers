@@ -190,11 +190,10 @@
         },
         "gidgethub": {
             "hashes": [
-                "sha256:3692d2df48a23c87ec4a5e74053ce343bc59cea7c34488a9136754a35aeb177a",
-                "sha256:4a456758a5fc8bfd581f297df90f2d09efbb830ccd209b1ceba4723705607d70"
+                "sha256:cfabfa696d422ee91eaf1e3f01ea75e576721233cc3ea8badc7d86c30061df8e",
+                "sha256:fab527a36fd89a27f68686f4c726b2efd989c3d2cac1c46149b1dd46c4e3ab7d"
             ],
-            "index": "pypi",
-            "version": "==3.3.0"
+            "version": "==4.1.1"
         },
         "idna": {
             "hashes": [
