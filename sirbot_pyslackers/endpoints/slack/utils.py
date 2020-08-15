@@ -41,6 +41,11 @@ HELP_FIELD_DESCRIPTIONS = [
         "short": True,
     },
     {
+        "title": "/resources",
+        "value": "Share resources for new python developers",
+        "short": True,
+    },
+    {
         "title": "g#user/repo",
         "value": "Share the link to that github repo. User default to `pyslackers`.",
     },

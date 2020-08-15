@@ -18,6 +18,7 @@ def create_endpoints(plugin):
     plugin.on_command("/sponsors", sponsors)
     plugin.on_command("/snippet", snippet)
     plugin.on_command("/report", report)
+    plugin.on_command("/resources", resources)
 
 
 async def just_ask(command, app):
@@ -219,3 +220,38 @@ async def tell_admin(command, app):
     }
 
     await app.plugins["slack"].api.query(url=methods.DIALOG_OPEN, data=data)
+
+
+async def resources(command, app):
+    """
+    Share resources for new developers getting started with python
+    """
+    slack = app.plugins["slack"]
+    response = Message()
+    response["channel"] = command["channel_id"]
+    response["unfurl_links"] = False
+
+    response["text"] = (
+        "List below are some great resources to get started on learning python:\n"
+        "*Books:*\n"
+        "* <https://www.amazon.com/Learning-Python-Powerful-Object-Oriented-Programming-ebook/dp/B00DDZPC9S/|Learning Python: Powerful Object Oriented Programming>\n"
+        "* <https://www.amazon.com/Automate-Boring-Stuff-Python-Programming-ebook/dp/B00WJ049VU/|Automate the Boring Stuff>\n"
+        "* <https://www.amazon.com/Hitchhikers-Guide-Python-Practices-Development-ebook/dp/B01L9W8CVG/|The Hitchhiker's Guide to Python: Best Practices for Development>\n"
+        "* <https://www.amazon.com/Think-Python-Like-Computer-Scientist-ebook/dp/B018UXJ9EQ/|Think Python: How to Think Like a Computer Scientist>\n"
+        "* <https://runestone.academy/runestone/books/published/thinkcspy/index.html|How to Think Like a Computer Scientist: Interactive Edition>\n"
+        "* <http://www.obeythetestinggoat.com/book/praise.harry.html|Test Driven Development with Python aka 'Obey the Testing Goat'>\n"
+        "* <https://github.com/EbookFoundation/free-programming-books/blob/master/free-programming-books.md#python|List of free Python e-books>\n"
+        "*Videos:*\n"
+        "* <https://www.youtube.com/channel/UCI0vQvr9aFn27yR6Ej6n5Uz|Dan Bader's Python Tutorials>\n"
+        "* <https://pyvideo.org/|PyVideo.org>\n"
+        "* <https://www.youtube.com/watch?v=bgBWp9EIlMM|Engineer Man>\n"
+        "*Online Courses:*\n"
+        "* <https://www.datacamp.com/|DataCamp Data Science and Machine Learning>\n"
+        "*Cheat Sheets:*\n"
+        "* <https://www.pythoncheatsheet.org/|Online Python Cheat Sheet>\n"
+        "*Project Based Learning:*\n"
+        "* <https://github.com/tuvtran/project-based-learning|Project Based Learning Courses>\n\n"
+        "For the full list of resources see our curated list <https://github.com/pyslackers/learning-resources|here>\n"
+    )
+
+    await app.plugins["slack"].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
