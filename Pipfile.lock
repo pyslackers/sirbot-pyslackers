@@ -438,10 +438,10 @@
         },
         "isort": {
             "hashes": [
-                "sha256:6ae9cf5414e416954e3421f861cbbfc099b3ace63cb270cc76c6670efd960a0a",
-                "sha256:78661ad751751cb3c181d37302e175a0c644b3714877c073df058c596281d7fd"
+                "sha256:60a1b97e33f61243d12647aaaa3e6cc6778f5eb9f42997650f1cc975b6008750",
+                "sha256:d488ba1c5a2db721669cc180180d5acf84ebdc5af7827f7aaeaa75f73cf0e2b8"
             ],
-            "version": "==5.0.4"
+            "version": "==5.4.2"
         },
         "mccabe": {
             "hashes": [
