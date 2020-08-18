@@ -232,7 +232,7 @@ async def resources(command, app):
     response["unfurl_links"] = False
 
     response["text"] = (
-        "List below are some great resources to get started on learning python:\n"
+        "Listed below are some great resources to get started on learning python:\n"
         "*Books:*\n"
         "* <https://www.amazon.com/Learning-Python-Powerful-Object-Oriented-Programming-ebook/dp/B00DDZPC9S/|Learning Python: Powerful Object Oriented Programming>\n"
         "* <https://www.amazon.com/Automate-Boring-Stuff-Python-Programming-ebook/dp/B00WJ049VU/|Automate the Boring Stuff>\n"
