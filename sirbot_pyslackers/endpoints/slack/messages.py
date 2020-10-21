@@ -89,7 +89,7 @@ async def stock_quote(message, app):
                 attachments=[
                     {
                         "color": color,
-                        "title": f"{quote.symbol} ({quote.company}): ${quote.price:,.4f}",
+                        "title": f"{quote.symbol} ({quote.company}): {currency_symbol}{quote.price:,.4f}",
                         "title_link": f"https://finance.yahoo.com/quote/{quote.symbol}",
                         "fields": [
                             {
@@ -109,17 +109,17 @@ async def stock_quote(message, app):
                             },
                             {
                                 "title": "Close",
-                                "value": f"${quote.market_close:,.4f}",
+                                "value": f"{currency_symbol}{quote.market_close:,.4f}",
                                 "short": True,
                             },
                             {
                                 "title": "Low",
-                                "value": f"${quote.low:,.4f}",
+                                "value": f"{currency_symbol}{quote.low:,.4f}",
                                 "short": True,
                             },
                             {
                                 "title": "High",
-                                "value": f"${quote.high:,.4f}",
+                                "value": f"{currency_symbol}{quote.high:,.4f}",
                                 "short": True,
                             },
                         ],
