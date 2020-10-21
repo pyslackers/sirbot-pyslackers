@@ -14,10 +14,10 @@ from .utils import ADMIN_CHANNEL, HELP_FIELD_DESCRIPTIONS
 
 LOG = logging.getLogger(__name__)
 STOCK_REGEX = re.compile(
-    r"\b(?P<asset_class>[cs])\$(?P<symbol>\^?[A-Z.]{1,5})-?(?P<currency>[A-Z]{3})?\b"
+    r"\b(?P<asset_class>[cs])\$(?P<symbol>\^?[A-Z.]{1,5})(-(?P<currency>[A-Z]{3}))?\b"
 )
 TELL_REGEX = re.compile("tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)")
-CRYPTO_CURRENCIES = {
+FIAT_CURRENCY = {
     "USD": "$",
     "GBP": "£",
     "EUR": "€",
@@ -54,9 +54,9 @@ async def stock_quote(message, app):
         match.group("symbol"),
         match.group("currency"),
     )
-    if not currency or not CRYPTO_CURRENCIES.get(currency, False):
-        currency = "USD"
-    currency_symbol = CRYPTO_CURRENCIES[currency]
+
+    currency = match.group("currency") if match.group("currency") in FIAT_CURRENCY.keys() else "USD"
+    currency_symbol = FIAT_CURRENCY[currency]
     LOG.debug(
         "Fetching stock quotes for symbol %s in asset class %s", symbol, asset_class
     )
