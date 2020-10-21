@@ -1,5 +1,6 @@
 .env
 .env/
 .idea/
+.vscode/
 __pycache__
 docker/sirbot.env

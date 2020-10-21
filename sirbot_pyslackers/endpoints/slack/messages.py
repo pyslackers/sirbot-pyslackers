@@ -14,7 +14,15 @@ from .utils import ADMIN_CHANNEL, HELP_FIELD_DESCRIPTIONS
 
 LOG = logging.getLogger(__name__)
 STOCK_REGEX = re.compile(r"\b(?P<asset_class>[cs])\$(?P<symbol>\^?[A-Z.]{1,5})\b")
+STOCK_REGEX = re.compile(
+    r"\b(?P<asset_class>[cs])\$(?P<symbol>\^?[A-Z.]{1,5})-?(?P<currency>[A-Z]{3})?\b"
+)
 TELL_REGEX = re.compile("tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)")
+CRYPTO_CURRENCIES = {
+    "USD": "$",
+    "GBP": "£",
+    "EUR": "€",
+}
 
 
 def create_endpoints(plugin):
@@ -42,14 +50,21 @@ async def stock_quote(message, app):
     if not match:
         return
 
-    asset_class, symbol = match.group("asset_class"), match.group("symbol")
+    asset_class, symbol, currency = (
+        match.group("asset_class"),
+        match.group("symbol"),
+        match.group("currency"),
+    )
+    if not currency or not CRYPTO_CURRENCIES.get(currency, False):
+        currency = "USD"
+    currency_symbol = CRYPTO_CURRENCIES[currency]
     LOG.debug(
         "Fetching stock quotes for symbol %s in asset class %s", symbol, asset_class
     )
 
     if asset_class == "c":
-        LOG.debug("Fetching a crypto quote, appending USD as the pair's quote price.")
-        symbol += "-USD"
+        LOG.debug(f"Fetching a crypto quote, setting {currency} as the pair's quote price.")
+        symbol = f"{symbol}-{currency}"
 
     response = message.response()
     try:
@@ -80,7 +95,7 @@ async def stock_quote(message, app):
                         "fields": [
                             {
                                 "title": "Change",
-                                "value": f"${quote.change:,.4f} ({quote.change_percent:,.4f}%)",
+                                "value": f"{currency_symbol}{quote.change:,.4f} ({quote.change_percent:,.4f}%)",
                                 "short": True,
                             },
                             {
@@ -90,7 +105,7 @@ async def stock_quote(message, app):
                             },
                             {
                                 "title": "Open",
-                                "value": f"${quote.market_open:,.4f}",
+                                "value": f"{currency_symbol}{quote.market_open:,.4f}",
                                 "short": True,
                             },
                             {
