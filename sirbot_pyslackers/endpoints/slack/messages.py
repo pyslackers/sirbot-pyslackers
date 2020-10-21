@@ -55,14 +55,20 @@ async def stock_quote(message, app):
         match.group("currency"),
     )
 
-    currency = match.group("currency") if match.group("currency") in FIAT_CURRENCY.keys() else "USD"
+    currency = (
+        match.group("currency")
+        if match.group("currency") in FIAT_CURRENCY.keys()
+        else "USD"
+    )
     currency_symbol = FIAT_CURRENCY[currency]
     LOG.debug(
         "Fetching stock quotes for symbol %s in asset class %s", symbol, asset_class
     )
 
     if asset_class == "c":
-        LOG.debug(f"Fetching a crypto quote, setting {currency} as the pair's quote price.")
+        LOG.debug(
+            f"Fetching a crypto quote, setting {currency} as the pair's quote price."
+        )
         symbol = f"{symbol}-{currency}"
 
     response = message.response()
