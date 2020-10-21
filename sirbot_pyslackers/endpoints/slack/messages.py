@@ -13,7 +13,6 @@ from asyncpg.exceptions import UniqueViolationError
 from .utils import ADMIN_CHANNEL, HELP_FIELD_DESCRIPTIONS
 
 LOG = logging.getLogger(__name__)
-STOCK_REGEX = re.compile(r"\b(?P<asset_class>[cs])\$(?P<symbol>\^?[A-Z.]{1,5})\b")
 STOCK_REGEX = re.compile(
     r"\b(?P<asset_class>[cs])\$(?P<symbol>\^?[A-Z.]{1,5})-?(?P<currency>[A-Z]{3})?\b"
 )
