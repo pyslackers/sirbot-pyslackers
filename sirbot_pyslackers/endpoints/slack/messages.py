@@ -14,7 +14,7 @@ from .utils import ADMIN_CHANNEL, HELP_FIELD_DESCRIPTIONS
 
 LOG = logging.getLogger(__name__)
 STOCK_REGEX = re.compile(
-    r"\b(?P<asset_class>[cs])\$(?P<symbol>\^?[A-Z.]{1,5})(-(?P<currency>[A-Z]{3}))?\b"
+    r"\b(?P<asset_class>[cs])\$(?P<symbol>\^?[A-Z.]{1,5})(?:-(?P<currency>[A-Z]{3}))?\b"
 )
 TELL_REGEX = re.compile("tell (<(#|@)(?P<to_id>[A-Z0-9]*)(|.*)?>) (?P<msg>.*)")
 FIAT_CURRENCY = {
@@ -56,9 +56,7 @@ async def stock_quote(message, app):
     )
 
     currency = (
-        match.group("currency")
-        if match.group("currency") in FIAT_CURRENCY.keys()
-        else "USD"
+        match.group("currency") if match.group("currency") in FIAT_CURRENCY else "USD"
     )
     currency_symbol = FIAT_CURRENCY[currency]
     LOG.debug(
