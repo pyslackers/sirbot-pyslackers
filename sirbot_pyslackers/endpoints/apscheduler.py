@@ -1,5 +1,6 @@
 import logging
 import datetime
+import random
 
 import pytz
 from slack import methods
@@ -45,26 +46,40 @@ async def advent_of_code(bot):
     LOG.info("Creating Advent Of Code threads...")
     for_day = datetime.datetime.now(tz=pytz.timezone("America/New_York"))
     year, day = for_day.year, for_day.day
+
+    # megathread for all solutions at once (most solutions tend to use similar logic)
+    message = Message()
+    message["channel"] = "advent_of_code"
+    message["attachments"] = [
+        {
+            "fallback": f"Advent Of Code {year} thread for Day {day}",
+            "color": random.choice(["#ff0000", "#378b29"]),
+            "title": f":santa: :christmas_tree: Advent of Code {year}: Day {day} :christmas_tree: :santa:",
+            "title_link": f"https://adventofcode.com/{year}/day/{day}",
+            "text": f"Post solutions to day {day} in this thread, in any language!",
+            "footer": "Advent of Code",
+            "footer_icon": "https://adventofcode.com/favicon.ico",
+            "ts": int(for_day.timestamp()),
+        }
+    ]
+
+    await bot["plugins"]["slack"].api.query(
+        url=methods.CHAT_POST_MESSAGE, data=message
+    )
+
+    # threads for the part1/2 broken out
     for part in range(1, 3):
         message = Message()
         message["channel"] = "advent_of_code"
         message["attachments"] = [
             {
-                "fallback": "Official {} Advent Of Code Thread for Day {} Part {}".format(
-                    year, day, part
-                ),
+                "fallback": f"Advent Of Code {year} Thread for Day {day} Part {part}",
                 "color": ["#ff0000", "#378b29"][  # red  # green
                     (part - 1) // 1
                 ],  # red=part 1, green=part 2
-                "title": ":christmas_tree: {} Advent of Code Thread: Day {} Part {} :christmas_tree:".format(
-                    year, day, part
-                ),
-                "title_link": "https://adventofcode.com/{}/day/{}".format(year, day),
-                "text": (
-                    "Post solutions to part {} in this thread, in any language, to avoid spoilers!".format(
-                        part
-                    )
-                ),
+                "title": f"Advent of Code {year}: Day {day} Part {part}",
+                "title_link": f"https://adventofcode.com/{year}/day/{day}",
+                "text": f"Post solutions to part {part} in this thread, in any language!",
                 "footer": "Advent of Code",
                 "footer_icon": "https://adventofcode.com/favicon.ico",
                 "ts": int(for_day.timestamp()),
