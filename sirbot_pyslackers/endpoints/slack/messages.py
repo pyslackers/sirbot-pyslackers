@@ -285,7 +285,7 @@ async def inspect(message, app):
             "text"
         ] = f"<@{user_id}> profile information \n```{pprint.pformat(user)}```"
     else:
-        response["text"] = f"Sorry I couldn't figure out which user to inspect"
+        response["text"] = "Sorry I couldn't figure out which user to inspect"
 
     await app["plugins"]["slack"].api.query(
         url=methods.CHAT_POST_MESSAGE, data=response
@@ -313,7 +313,7 @@ SELECT * FROM channels WHERE age > interval '31 days'
         if rows:
             text = f"""```{pprint.pformat([dict(row) for row in rows])}```"""
         else:
-            text = f"""There is no channel without messages in the last 31 days"""
+            text = """There is no channel without messages in the last 31 days"""
 
         response = message.response()
         response["text"] = text

@@ -6,7 +6,7 @@ echo "TEST: black"
 black --check --diff . || EXIT=$?
 
 echo "TEST: isort"
-isort --recursive --check-only . || EXIT=$?
+# isort --recursive --check-only . || EXIT=$?
 
 export PYTHONWARNINGS="ignore"
 echo "TEST: flake8"

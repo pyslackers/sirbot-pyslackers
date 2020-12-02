@@ -154,7 +154,7 @@ async def pypi_search(command, app):
             elif len(results) > 3:
                 response["attachments"][0]["fields"].append(
                     {
-                        "title": f"More results",
+                        "title": "More results",
                         "value": f'<{app.plugins["pypi"].RESULT_URL.format(command["text"])}|'
                         f"{len(results) - 3} more results..>",
                     }

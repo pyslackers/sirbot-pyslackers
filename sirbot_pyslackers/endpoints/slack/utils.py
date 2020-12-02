@@ -6,7 +6,7 @@ ADMIN_CHANNEL = os.environ.get("SLACK_ADMIN_CHANNEL") or "G1DRT62UC"
 HELP_FIELD_DESCRIPTIONS = [
     {
         "title": "@sir_botalot hello",
-        "value": f"Say hello to sir_botalot.",
+        "value": "Say hello to sir_botalot.",
         "short": True,
     },
     {
