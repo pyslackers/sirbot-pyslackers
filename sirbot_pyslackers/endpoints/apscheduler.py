@@ -35,7 +35,7 @@ def create_jobs(scheduler, bot):
         month=12,
         day="1-25",
         hour=0,
-        minute=5,
+        minute=0,
         second=0,
         timezone="America/New_York",
         kwargs={"bot": bot},
