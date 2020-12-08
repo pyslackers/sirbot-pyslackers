@@ -19,6 +19,7 @@ def create_endpoints(plugin):
     plugin.on_command("/snippet", snippet)
     plugin.on_command("/report", report)
     plugin.on_command("/resources", resources)
+    plugin.on_command("/xpost", xpost)
 
 
 async def just_ask(command, app):
@@ -163,9 +164,7 @@ async def pypi_search(command, app):
 
         else:
             response["response_type"] = "ephemeral"
-            response[
-                "text"
-            ] = f"Could not find anything on PyPi matching `{command['text']}`"
+            response["text"] = f"Could not find anything on PyPi matching `{command['text']}`"
 
     await app.plugins["slack"].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
 
@@ -255,3 +254,19 @@ async def resources(command, app):
     )
 
     await app.plugins["slack"].api.query(url=methods.CHAT_POST_MESSAGE, data=response)
+
+
+async def xpost(command, app):
+    slack = app.plugins["slack"]
+    response = Message()
+    response["channel"] = command["channel_id"]
+    response["unfurl_links"] = False
+
+    response["text"] = (
+        "Please don't cross post the same question in multiple channels. "
+        "There may not be a lot of folks online or active at any given moment, "
+        "but please be patient. If your question fits in multiple channels, please "
+        "pick the one you think is most suitable and post it there."
+    )
+
+    await slack.api.query(url=methods.CHAT_POST_MESSAGE, data=response)
